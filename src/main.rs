@@ -12,6 +12,7 @@ use chrono::{Timelike, Utc};
 use clap::Parser;
 use futures::stream::{self, StreamExt};
 use inquire::Select;
+use std::env;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -601,10 +602,20 @@ async fn main() -> Result<()> {
     let cli = Cli::parse();
 
     // Check if token came from environment (not explicitly provided)
-    let token_from_env = cli.token.is_some() && std::env::args().all(|arg| !arg.starts_with("--token") && !arg.starts_with("-t"));
+    let raw_args: Vec<String> = env::args().collect();
+    let token_from_env = cli.token.is_some()
+        && raw_args
+            .iter()
+            .skip(1)
+            .all(|arg| !arg.starts_with("--token") && !arg.starts_with("-t"));
 
-    // If no arguments provided (only defaults), show interactive launcher
+    // If no meaningful CLI arguments were provided, show the interactive launcher.
+    // Non-default values like `--max-requests 5` should count as explicit args so
+    // git hooks and scripted invocations never fall back to the interactive menu.
     let has_explicit_args = (cli.token.is_some() && !token_from_env)
+        || cli.output != PathBuf::from("data")
+        || cli.max_requests != 10
+        || cli.concurrency != 5
         || cli.use_dorks 
         || cli.full_scan 
         || cli.interactive 

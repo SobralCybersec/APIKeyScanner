@@ -21,7 +21,7 @@ fn main() {
     let hook_content = r#"#!/bin/sh
 # Auto-installed by api-key-scanner
 echo "🔍 Running API key scanner..."
-cargo run --release -- --max-requests 5 || exit 1
+cargo run --release -- --max-requests 5 --no-tui || exit 1
 "#;
 
     fs::write(&hook_path, hook_content).ok();
