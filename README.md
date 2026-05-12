@@ -14,7 +14,7 @@ High-performance Rust-based API key scanner with 70+ detection patterns, concurr
 
 <h1 align="center">
   <img src="https://i.imgur.com/dwyUWDH.gif" width="50" />
-  What's New in 2026
+  What's New
 </h1>
 
 * **30+ New API Patterns**: xAI (Grok), Groq, DeepSeek, Vercel, Supabase, Cloudflare, Databricks, Snowflake, Figma, LangSmith, Airtable
