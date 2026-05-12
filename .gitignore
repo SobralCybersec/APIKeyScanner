@@ -1,0 +1,17 @@
+/target
+/data
+*.json
+.env
+*.log
+*.csv
+/private_keys
+/private_keys/**
+private_keys/
+*.key
+*.pem
+full_keys.json
+!/data/
+!/data/.gitkeep
+!/data/latest.json
+scanner-config.toml
+scan_report_*.md

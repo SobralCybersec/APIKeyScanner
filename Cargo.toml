@@ -1,0 +1,37 @@
+[package]
+name = "api-key-scanner"
+version = "1.0.0"
+edition = "2024"
+authors = ["Security Research Team"]
+description = "Fast GitHub API key scanner with Git automation"
+
+[dependencies]
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "time", "sync"] }
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "gzip"], default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+thiserror = "1"
+regex = "1"
+base64 = "0.22"
+chrono = { version = "0.4", features = ["serde"] }
+clap = { version = "4", features = ["derive", "env"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+flate2 = "1"
+tar = "0.4"
+futures = "0.3"
+dotenv = "0.15"
+sha2 = "0.10"
+inquire = "0.9"
+ratatui = "0.30"
+crossterm = "0.29"
+toml = "0.8"
+lazy_static = "1.5"
+
+[profile.release]
+opt-level = "z"     # Optimize for size (60-70% reduction)
+lto = "fat"         # Full link-time optimization
+codegen-units = 1   # Single compilation unit for better optimization
+strip = true        # Strip all symbols
+panic = "abort"     # No unwinding, smaller binary
