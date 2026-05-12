@@ -6,7 +6,7 @@
 
 High-performance Rust-based API key scanner with 70+ detection patterns, concurrent GitHub scanning, and live validation. Achieves fast repository analysis with context-aware filtering and public/private output separation.
 
-**English**
+**English Language**
 
 </div>
 
