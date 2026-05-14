@@ -37,9 +37,20 @@ pub async fn launch_interactive_tui() -> Result<LaunchConfig> {
     config.github_token = Some(token.clone());
 
     // Step 2: Scan Configuration
-    let (max_requests, concurrency) = get_scan_limits(config.max_requests, config.concurrency)?;
+    let (max_requests, concurrency, max_minutes, max_repos_per_query, max_total_repos, query_loops) = get_scan_limits(
+        config.max_requests,
+        config.concurrency,
+        config.max_minutes,
+        config.max_repos_per_query,
+        config.max_total_repos,
+        config.query_loops,
+    )?;
     config.max_requests = max_requests;
     config.concurrency = concurrency;
+    config.max_minutes = max_minutes;
+    config.max_repos_per_query = max_repos_per_query;
+    config.max_total_repos = max_total_repos;
+    config.query_loops = query_loops;
 
     // Step 3: Output Path
     let output_path = get_output_path(&config.output_path)?;
@@ -126,12 +137,19 @@ fn get_github_token(saved_token: Option<&str>) -> Result<String> {
     Ok(token)
 }
 
-fn get_scan_limits(default_requests: usize, default_concurrency: usize) -> Result<(usize, usize)> {
+fn get_scan_limits(
+    default_requests: usize,
+    default_concurrency: usize,
+    default_max_minutes: Option<u64>,
+    default_max_repos_per_query: usize,
+    default_max_total_repos: Option<usize>,
+    default_query_loops: usize,
+) -> Result<(usize, usize, Option<u64>, usize, Option<usize>, usize)> {
     println!("Step 2/6: Scan Limits\n");
 
     let max_requests = CustomType::<usize>::new("Max API requests:")
         .with_default(default_requests)
-        .with_help_message("GitHub API rate limit: 30 req/min authenticated, 10 req/min unauthenticated")
+        .with_help_message("Each query uses 1-10 search requests (pagination) + 1 per repo tarball. 200 is a safe default for a full dork run.")
         .with_error_message("Please enter a valid number")
         .prompt()?;
 
@@ -141,8 +159,66 @@ fn get_scan_limits(default_requests: usize, default_concurrency: usize) -> Resul
         .with_error_message("Please enter a valid number")
         .prompt()?;
 
-    println!("Limits configured: {} requests, {} concurrent scans\n", max_requests, concurrency);
-    Ok((max_requests, concurrency))
+    let use_time_budget = Confirm::new("Set a time budget in minutes?")
+        .with_default(default_max_minutes.is_some())
+        .with_help_message("Stop scanning after the selected number of minutes, even if request budget remains")
+        .prompt()?;
+
+    let max_minutes = if use_time_budget {
+        Some(
+            CustomType::<u64>::new("Maximum scan time (minutes):")
+                .with_default(default_max_minutes.unwrap_or(20))
+                .with_help_message("Example: 20 for a 20-minute scan window")
+                .with_error_message("Please enter a valid number of minutes")
+                .prompt()?
+        )
+    } else {
+        None
+    };
+
+    let max_repos_per_query = CustomType::<usize>::new("Max repositories per query:")
+        .with_default(default_max_repos_per_query)
+        .with_help_message("Repos scanned per search query. 30 covers most of GitHub's top results per query.")
+        .with_error_message("Please enter a valid number")
+        .prompt()?;
+
+    let cap_total = Confirm::new("Limit total repositories scanned across the whole run?")
+        .with_default(default_max_total_repos.is_some())
+        .with_help_message("Leave off to scan ALL repositories found by the dorks (default)")
+        .prompt()?;
+
+    let max_total_repos = if cap_total {
+        Some(
+            CustomType::<usize>::new("Maximum total repositories to scan:")
+                .with_default(default_max_total_repos.unwrap_or(50))
+                .with_help_message("Scanner stops after this many repos regardless of remaining queries")
+                .with_error_message("Please enter a valid number")
+                .prompt()?
+        )
+    } else {
+        None
+    };
+
+    let query_loops = CustomType::<usize>::new("How many times to repeat the full query set?")
+        .with_default(default_query_loops)
+        .with_help_message("Use 1 for one pass, 2 for two full passes, and so on")
+        .with_error_message("Please enter a valid number")
+        .prompt()?;
+
+    println!(
+        "Limits configured: {} requests, {} concurrent scans, {} repo cap per query{}, {} query loop(s){}\n",
+        max_requests,
+        concurrency,
+        max_repos_per_query,
+        max_total_repos
+            .map(|n| format!(", {} total repo cap", n))
+            .unwrap_or_else(|| " (all repos)".into()),
+        query_loops,
+        max_minutes
+            .map(|m| format!(", {} minute time budget", m))
+            .unwrap_or_default()
+    );
+    Ok((max_requests, concurrency, max_minutes, max_repos_per_query, max_total_repos, query_loops))
 }
 
 fn get_output_path(default_path: &str) -> Result<String> {
@@ -169,7 +245,7 @@ fn get_scan_mode(default_mode: &ScanMode) -> Result<ScanMode> {
     println!("Step 4/6: Scan Mode\n");
 
     let modes = vec![
-        "Time-slotted (1 query, fast, recommended for frequent scans)",
+        "Baseline scan (all core queries, balanced coverage)",
         "Full scan (10 queries, comprehensive, ~5-10 minutes)",
         "Google Dorks (advanced patterns, thorough, ~10-20 minutes)",
         "Custom queries (select specific patterns)",
@@ -188,7 +264,7 @@ fn get_scan_mode(default_mode: &ScanMode) -> Result<ScanMode> {
         .prompt()?;
 
     let mode = match selected {
-        s if s.starts_with("Time-slotted") => ScanMode::TimeSlotted,
+        s if s.starts_with("Baseline scan") => ScanMode::TimeSlotted,
         s if s.starts_with("Full scan") => ScanMode::FullScan,
         s if s.starts_with("Google Dorks") => ScanMode::GoogleDorks,
         s if s.starts_with("Custom queries") => ScanMode::CustomQueries,
@@ -207,13 +283,18 @@ fn get_custom_queries(default_queries: &[String]) -> Result<Vec<String>> {
         ("OpenAI (sk-proj-)", "sk-proj- filename:.env"),
         ("OpenAI service account", "sk-svcacct- filename:.env"),
         ("OpenAI admin", "sk-admin- filename:.env"),
+        ("OpenAI admin ENV", "OPENAI_ADMIN_KEY extension:env"),
+        ("OpenAI project ENV", "OPENAI_PROJECT_API_KEY extension:env"),
+        ("OpenAI service-account ENV", "OPENAI_SERVICE_ACCOUNT_KEY extension:env"),
         ("OpenAI (Python)", "sk-proj- extension:py"),
         ("OpenAI (JavaScript)", "sk-proj- extension:js"),
         ("ChatGPT/OpenAI ENV", "CHATGPT_API_KEY extension:env"),
         ("Codex ENV", "CODEX_API_KEY extension:env"),
         ("Anthropic (Claude)", "sk-ant- extension:py"),
         ("Anthropic ENV", "ANTHROPIC_API_KEY extension:env"),
+        ("Anthropic YAML", "ANTHROPIC_API_KEY extension:yaml"),
         ("Claude ENV", "CLAUDE_API_KEY extension:env"),
+        ("Claude token ENV", "CLAUDE_API_TOKEN extension:env"),
         ("OpenAI ENV", "OPENAI_API_KEY extension:env"),
         ("Google/Gemini ENV", "GOOGLE_API_KEY extension:env"),
         ("xAI (Grok)", "xai- extension:env"),
@@ -328,6 +409,22 @@ fn display_config_summary(config: &ScannerConfig) -> Result<()> {
     println!("GitHub Token:        {}", if config.github_token.as_deref().is_some_and(|token| !token.trim().is_empty()) { "<saved>" } else { "<not saved>" });
     println!("Max Requests:        {}", config.max_requests);
     println!("Concurrency:         {}", config.concurrency);
+    println!(
+        "Time Budget:         {}",
+        config
+            .max_minutes
+            .map(|m| format!("{} minute(s)", m))
+            .unwrap_or_else(|| "None".to_string())
+    );
+    println!("Repo Cap / Query:    {}", config.max_repos_per_query);
+    println!(
+        "Total Repo Cap:      {}",
+        config
+            .max_total_repos
+            .map(|n| n.to_string())
+            .unwrap_or_else(|| "All (no cap)".to_string())
+    );
+    println!("Query Loops:         {}", config.query_loops);
     println!("Output Path:         {}", config.output_path);
     println!("Scan Mode:           {}", config.scan_mode.description());
     

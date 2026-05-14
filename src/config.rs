@@ -13,6 +13,19 @@ pub struct ScannerConfig {
     
     #[serde(default = "default_concurrency")]
     pub concurrency: usize,
+
+    #[serde(default)]
+    pub max_minutes: Option<u64>,
+
+    #[serde(default = "default_max_repos_per_query")]
+    pub max_repos_per_query: usize,
+
+    /// Total repo cap across the entire scan. `None` = no cap (scan all found).
+    #[serde(default)]
+    pub max_total_repos: Option<usize>,
+
+    #[serde(default = "default_query_loops")]
+    pub query_loops: usize,
     
     #[serde(default = "default_output_path")]
     pub output_path: String,
@@ -28,6 +41,19 @@ pub struct ScannerConfig {
     
     #[serde(default)]
     pub enable_tui: bool,
+
+    /// Validate all findings every time this many repos have been scanned.
+    /// `None` (default) = validate only at the end of the full scan.
+    /// Set to e.g. `100` to validate after every 100 repos and persist mid-scan.
+    #[serde(default)]
+    pub validate_every_n_repos: Option<usize>,
+
+    /// Run the full query set in an endless loop until the user stops the
+    /// scanner (Ctrl-C / 'q' in TUI) or a full pass returns zero new repos.
+    /// Each pass resets the request counter so the budget applies per-pass.
+    /// Default: false (single pass).
+    #[serde(default)]
+    pub endless_loop: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -56,7 +82,7 @@ impl ScanMode {
     
     pub fn description(&self) -> &str {
         match self {
-            ScanMode::TimeSlotted => "Time-slotted (1 query, fast)",
+            ScanMode::TimeSlotted => "Baseline scan (all core queries)",
             ScanMode::FullScan => "Full scan (10 queries, comprehensive)",
             ScanMode::GoogleDorks => "Google Dorks (advanced patterns)",
             ScanMode::CustomQueries => "Custom queries (user-selected)",
@@ -64,9 +90,17 @@ impl ScanMode {
     }
 }
 
-fn default_max_requests() -> usize { 10 }
+fn default_max_requests() -> usize { 200 }
 fn default_concurrency() -> usize { 5 }
+fn default_max_repos_per_query() -> usize { 30 }
+fn default_query_loops() -> usize { 1 }
 fn default_output_path() -> String { "data".to_string() }
+
+/// Default: no mid-scan validation checkpoints.
+pub fn no_validation_checkpoint() -> Option<usize> { None }
+
+/// `None` means "scan all repos found" — the default behaviour.
+pub fn no_repo_cap() -> Option<usize> { None }
 
 impl Default for ScannerConfig {
     fn default() -> Self {
@@ -74,11 +108,17 @@ impl Default for ScannerConfig {
             github_token: None,
             max_requests: default_max_requests(),
             concurrency: default_concurrency(),
+            max_minutes: None,
+            max_repos_per_query: default_max_repos_per_query(),
+            max_total_repos: no_repo_cap(),
+            query_loops: default_query_loops(),
             output_path: default_output_path(),
             scan_mode: ScanMode::default(),
             custom_queries: Vec::new(),
             enable_validation: false,
             enable_tui: true,
+            validate_every_n_repos: no_validation_checkpoint(),
+            endless_loop: false,
         }
     }
 }
@@ -132,6 +172,19 @@ max_requests = 10
 # Number of concurrent repository scans
 concurrency = 5
 
+# Optional time budget in minutes
+# max_minutes = 20
+
+# Maximum repositories to analyze per query
+max_repos_per_query = 9
+
+# Maximum total repositories to scan across the entire run.
+# Comment out or set to 0 to scan ALL repositories found (default).
+# max_total_repos = 50
+
+# Number of times to repeat the full query set
+query_loops = 1
+
 # Output directory for scan results
 output_path = "data"
 
@@ -159,9 +212,10 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = ScannerConfig::default();
-        assert_eq!(config.max_requests, 10);
+        assert_eq!(config.max_requests, 200);
         assert_eq!(config.concurrency, 5);
         assert_eq!(config.scan_mode, ScanMode::TimeSlotted);
+        assert_eq!(config.validate_every_n_repos, None);
     }
     
     #[test]

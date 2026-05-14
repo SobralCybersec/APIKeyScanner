@@ -24,14 +24,17 @@ futures = "0.3"
 dotenv = "0.15"
 sha2 = "0.10"
 inquire = "0.9"
-ratatui = "0.30"
 crossterm = "0.29"
 toml = "0.8"
-lazy_static = "1.5"
-
+zip = { version = "2", default-features = false, features = ["deflate"] }
+rayon = "1"
+aho-corasick = "1"
 [profile.release]
-opt-level = "z"     # Optimize for size (60-70% reduction)
-lto = "fat"         # Full link-time optimization
-codegen-units = 1   # Single compilation unit for better optimization
-strip = true        # Strip all symbols
-panic = "abort"     # No unwinding, smaller binary
+opt-level = "z"
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+[profile.dev]
+split-debuginfo = "unpacked"
