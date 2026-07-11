@@ -1,68 +1,24 @@
 [
   {
-    "repository": "bilalmachraa82/aiti-assistant",
-    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/.env.example",
-    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/.env.example",
+    "repository": "rkj13780/ecomm-prod-assistant",
+    "file_path": "rkj13780-ecomm-prod-assistant-4b45209/notebook/test copy.ipynb",
+    "file_url": "https://github.com/rkj13780/ecomm-prod-assistant/blob/main/rkj13780-ecomm-prod-assistant-4b45209/notebook/test copy.ipynb",
     "commit_sha": null,
-    "discovered_at": "2026-07-11T15:31:03.358646910+00:00",
-    "key_type": "sk-proj- filename:.env-database-url",
-    "key_preview": "sqlite:///./***",
-    "line_number": 19,
-    "entropy": 3.3401998765158556
+    "discovered_at": "2026-07-11T16:27:35.075826233+00:00",
+    "key_type": "sk-proj- filename:.env-google-api",
+    "key_preview": "AIzaSyDO31oE***",
+    "line_number": 48,
+    "entropy": 4.926427859887888
   },
   {
-    "repository": "bilalmachraa82/aiti-assistant",
-    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/.env.railway",
-    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/.env.railway",
+    "repository": "cojobro/bagl-backend",
+    "file_path": "cojobro-bagl-backend-13a4658/.env_example",
+    "file_url": "https://github.com/cojobro/bagl-backend/blob/main/cojobro-bagl-backend-13a4658/.env_example",
     "commit_sha": null,
-    "discovered_at": "2026-07-11T15:31:03.361481274+00:00",
-    "key_type": "sk-proj- filename:.env-database-url",
-    "key_preview": "sqlite:////a***",
-    "line_number": 25,
-    "entropy": 3.3837930573985107
-  },
-  {
-    "repository": "bilalmachraa82/aiti-assistant",
-    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/README.md",
-    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/README.md",
-    "commit_sha": null,
-    "discovered_at": "2026-07-11T15:31:03.372632096+00:00",
-    "key_type": "sk-proj- filename:.env-database-url",
-    "key_preview": "sqlite:///./***",
-    "line_number": 69,
-    "entropy": 3.366091329119192
-  },
-  {
-    "repository": "PradeepVepada/decifur.ai",
-    "file_path": "PradeepVepada-decifur.ai-a1eb01a/.env_sample",
-    "file_url": "https://github.com/PradeepVepada/decifur.ai/blob/main/PradeepVepada-decifur.ai-a1eb01a/.env_sample",
-    "commit_sha": null,
-    "discovered_at": "2026-07-11T15:31:03.876289396+00:00",
-    "key_type": "sk-proj- filename:.env-mistral-env",
-    "key_preview": "UUWOanpwHQid***",
+    "discovered_at": "2026-07-11T16:27:35.357945256+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgres://a***",
     "line_number": 2,
-    "entropy": 4.631292988181899
-  },
-  {
-    "repository": "PradeepVepada/decifur.ai",
-    "file_path": "PradeepVepada-decifur.ai-a1eb01a/.env_sample",
-    "file_url": "https://github.com/PradeepVepada/decifur.ai/blob/main/PradeepVepada-decifur.ai-a1eb01a/.env_sample",
-    "commit_sha": null,
-    "discovered_at": "2026-07-11T15:31:03.877015331+00:00",
-    "key_type": "sk-proj- filename:.env-openai-env",
-    "key_preview": "sk-proj--wea***",
-    "line_number": 19,
-    "entropy": 4.051995360985799
-  },
-  {
-    "repository": "FabienFNX/formation-academy-2026",
-    "file_path": "FabienFNX-formation-academy-2026-21b3f02/07 - LangChain pour le RAG/01_document_loading.ipynb",
-    "file_url": "https://github.com/FabienFNX/formation-academy-2026/blob/main/FabienFNX-formation-academy-2026-21b3f02/07 - LangChain pour le RAG/01_document_loading.ipynb",
-    "commit_sha": null,
-    "discovered_at": "2026-07-11T15:31:06.832404380+00:00",
-    "key_type": "sk-proj- filename:.env-brave-search",
-    "key_preview": "BSAGUAbgBrAG***",
-    "line_number": 35,
-    "entropy": 3.704149846963339
+    "entropy": 3.541478815344464
   }
 ]
