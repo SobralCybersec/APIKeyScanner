@@ -1,24 +1,68 @@
 [
   {
-    "repository": "spyrae/kronos-agent-os",
-    "file_path": "spyrae-kronos-agent-os-678327e/tests/test_cassettes_tools.py",
-    "file_url": "https://github.com/spyrae/kronos-agent-os/blob/main/spyrae-kronos-agent-os-678327e/tests/test_cassettes_tools.py",
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
     "commit_sha": null,
-    "discovered_at": "2026-07-28T18:40:19.697508103+00:00",
-    "key_type": "sk-proj- filename:.env-deepseek-env",
-    "key_preview": "sk-abcdefghi***",
-    "line_number": 186,
-    "entropy": 4.436605434317882
+    "discovered_at": "2026-07-28T21:19:20.479709689+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 13,
+    "entropy": 4.107156230921613
   },
   {
-    "repository": "xenroth/mlbb-tool-management",
-    "file_path": "xenroth-mlbb-tool-management-c949de4/temp-package/vendor/monolog/monolog/src/Monolog/Handler/MongoDBHandler.php",
-    "file_url": "https://github.com/xenroth/mlbb-tool-management/blob/main/xenroth-mlbb-tool-management-c949de4/temp-package/vendor/monolog/monolog/src/Monolog/Handler/MongoDBHandler.php",
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
     "commit_sha": null,
-    "discovered_at": "2026-07-28T18:40:23.470114773+00:00",
+    "discovered_at": "2026-07-28T21:19:20.479966030+00:00",
     "key_type": "sk-proj- filename:.env-mongodb-url",
     "key_preview": "mongodb://lo***",
-    "line_number": 28,
-    "entropy": 4.003856189774724
+    "line_number": 18,
+    "entropy": 4.210764573772789
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/.idea/dataSources.xml",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/.idea/dataSources.xml",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T21:19:20.480380346+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 8,
+    "entropy": 4.381835330852877
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T21:19:20.481599271+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 6,
+    "entropy": 4.17619062614183
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T21:19:20.482423919+00:00",
+    "key_type": "sk-proj- filename:.env-mongodb-url",
+    "key_preview": "mongodb://lo***",
+    "line_number": 25,
+    "entropy": 4.278351811711311
+  },
+  {
+    "repository": "rkj13780/ecomm-prod-assistant",
+    "file_path": "rkj13780-ecomm-prod-assistant-4b45209/notebook/test copy.ipynb",
+    "file_url": "https://github.com/rkj13780/ecomm-prod-assistant/blob/main/rkj13780-ecomm-prod-assistant-4b45209/notebook/test copy.ipynb",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T21:19:21.249818959+00:00",
+    "key_type": "sk-proj- filename:.env-google-api",
+    "key_preview": "AIzaSyDO31oE***",
+    "line_number": 48,
+    "entropy": 4.926427859887888
   }
 ]
