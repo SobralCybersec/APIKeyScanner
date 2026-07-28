@@ -1,13 +1,68 @@
 [
   {
-    "repository": "bromanko/nix-config",
-    "file_path": "bromanko-nix-config-66f6bbe/packages/secret-proxy/README.md",
-    "file_url": "https://github.com/bromanko/nix-config/blob/main/bromanko-nix-config-66f6bbe/packages/secret-proxy/README.md",
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
     "commit_sha": null,
-    "discovered_at": "2026-07-28T04:24:30.200405557+00:00",
-    "key_type": "sk-proj- filename:.env-private-key",
-    "key_preview": "-----BEGIN P***",
-    "line_number": 203,
-    "entropy": 3.200288670643577
+    "discovered_at": "2026-07-28T07:10:10.972119877+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 13,
+    "entropy": 4.107156230921613
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/.env_template",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T07:10:10.972359744+00:00",
+    "key_type": "sk-proj- filename:.env-mongodb-url",
+    "key_preview": "mongodb://lo***",
+    "line_number": 18,
+    "entropy": 4.210764573772789
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/.idea/dataSources.xml",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/.idea/dataSources.xml",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T07:10:10.972047971+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 8,
+    "entropy": 4.381835330852877
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T07:10:10.972011182+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 6,
+    "entropy": 4.17619062614183
+  },
+  {
+    "repository": "javakishore-veleti/upaguru-copilot",
+    "file_path": "javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "file_url": "https://github.com/javakishore-veleti/upaguru-copilot/blob/main/javakishore-veleti-upaguru-copilot-47a1e3b/src/main/resources/application.yml",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T07:10:10.972840317+00:00",
+    "key_type": "sk-proj- filename:.env-mongodb-url",
+    "key_preview": "mongodb://lo***",
+    "line_number": 25,
+    "entropy": 4.278351811711311
+  },
+  {
+    "repository": "Toston-App/lake",
+    "file_path": "Toston-App-lake-9da1b97/backend/app/alembic/env.py",
+    "file_url": "https://github.com/Toston-App/lake/blob/main/Toston-App-lake-9da1b97/backend/app/alembic/env.py",
+    "commit_sha": null,
+    "discovered_at": "2026-07-28T07:10:11.022991964+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgresql:/***",
+    "line_number": 36,
+    "entropy": 4.007742914525316
   }
 ]
