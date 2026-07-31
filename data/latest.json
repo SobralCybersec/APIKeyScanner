@@ -1,79 +1,79 @@
 [
   {
-    "repository": "bilalmachraa82/aiti-assistant",
-    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/.env.example",
-    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/.env.example",
+    "repository": "cojobro/bagl-backend",
+    "file_path": "cojobro-bagl-backend-13a4658/.env_example",
+    "file_url": "https://github.com/cojobro/bagl-backend/blob/main/cojobro-bagl-backend-13a4658/.env_example",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:40.146023608+00:00",
-    "key_type": "sk-proj- filename:.env-database-url",
-    "key_preview": "sqlite:///./***",
+    "discovered_at": "2026-07-31T14:42:44.832071834+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgres://a***",
+    "line_number": 2,
+    "entropy": 3.541478815344464
+  },
+  {
+    "repository": "spyrae/kronos-agent-os",
+    "file_path": "spyrae-kronos-agent-os-678327e/tests/test_cassettes_tools.py",
+    "file_url": "https://github.com/spyrae/kronos-agent-os/blob/main/spyrae-kronos-agent-os-678327e/tests/test_cassettes_tools.py",
+    "commit_sha": null,
+    "discovered_at": "2026-07-31T14:42:45.412606106+00:00",
+    "key_type": "sk-proj- filename:.env-deepseek-env",
+    "key_preview": "sk-abcdefghi***",
+    "line_number": 186,
+    "entropy": 4.436605434317882
+  },
+  {
+    "repository": "PradeepVepada/decifur.ai",
+    "file_path": "PradeepVepada-decifur.ai-a1eb01a/.env_sample",
+    "file_url": "https://github.com/PradeepVepada/decifur.ai/blob/main/PradeepVepada-decifur.ai-a1eb01a/.env_sample",
+    "commit_sha": null,
+    "discovered_at": "2026-07-31T14:42:46.200030875+00:00",
+    "key_type": "sk-proj- filename:.env-mistral-env",
+    "key_preview": "UUWOanpwHQid***",
+    "line_number": 2,
+    "entropy": 4.631292988181899
+  },
+  {
+    "repository": "PradeepVepada/decifur.ai",
+    "file_path": "PradeepVepada-decifur.ai-a1eb01a/.env_sample",
+    "file_url": "https://github.com/PradeepVepada/decifur.ai/blob/main/PradeepVepada-decifur.ai-a1eb01a/.env_sample",
+    "commit_sha": null,
+    "discovered_at": "2026-07-31T14:42:46.201027249+00:00",
+    "key_type": "sk-proj- filename:.env-openai-env",
+    "key_preview": "sk-proj--wea***",
     "line_number": 19,
-    "entropy": 3.3401998765158556
+    "entropy": 4.051995360985799
   },
   {
-    "repository": "bilalmachraa82/aiti-assistant",
-    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/.env.railway",
-    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/.env.railway",
+    "repository": "TerrenceMiao/LLM",
+    "file_path": "TerrenceMiao-LLM-b5967da/LiteLLM/README.md",
+    "file_url": "https://github.com/TerrenceMiao/LLM/blob/main/TerrenceMiao-LLM-b5967da/LiteLLM/README.md",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:40.148068470+00:00",
-    "key_type": "sk-proj- filename:.env-database-url",
-    "key_preview": "sqlite:////a***",
-    "line_number": 25,
-    "entropy": 3.3837930573985107
-  },
-  {
-    "repository": "bilalmachraa82/aiti-assistant",
-    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/README.md",
-    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/README.md",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:40.158094987+00:00",
-    "key_type": "sk-proj- filename:.env-database-url",
-    "key_preview": "sqlite:///./***",
-    "line_number": 69,
-    "entropy": 3.366091329119192
-  },
-  {
-    "repository": "iceener/aidevs-deeper",
-    "file_path": "iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
-    "file_url": "https://github.com/iceener/aidevs-deeper/blob/main/iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:40.655291932+00:00",
+    "discovered_at": "2026-07-31T14:42:46.905391508+00:00",
     "key_type": "sk-proj- filename:.env-postgres-url",
     "key_preview": "postgresql:/***",
-    "line_number": 171,
-    "entropy": 4.047562138070836
+    "line_number": 107,
+    "entropy": 4.08796911368024
   },
   {
-    "repository": "iceener/aidevs-deeper",
-    "file_path": "iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
-    "file_url": "https://github.com/iceener/aidevs-deeper/blob/main/iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
+    "repository": "TerrenceMiao/LLM",
+    "file_path": "TerrenceMiao-LLM-b5967da/video/.env.example",
+    "file_url": "https://github.com/TerrenceMiao/LLM/blob/main/TerrenceMiao-LLM-b5967da/video/.env.example",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:40.678774290+00:00",
-    "key_type": "sk-proj- filename:.env-postgres-url",
-    "key_preview": "postgres://u***",
-    "line_number": 858,
-    "entropy": 3.735687824737577
+    "discovered_at": "2026-07-31T14:42:46.916485736+00:00",
+    "key_type": "sk-proj- filename:.env-openai-legacy",
+    "key_preview": "sk-or-v1-9c1***",
+    "line_number": 1,
+    "entropy": 4.285484225182058
   },
   {
-    "repository": "iceener/aidevs-deeper",
-    "file_path": "iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite.mdc",
-    "file_url": "https://github.com/iceener/aidevs-deeper/blob/main/iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite.mdc",
+    "repository": "TerrenceMiao/LLM",
+    "file_path": "TerrenceMiao-LLM-b5967da/video/.env.example",
+    "file_url": "https://github.com/TerrenceMiao/LLM/blob/main/TerrenceMiao-LLM-b5967da/video/.env.example",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:40.663900849+00:00",
-    "key_type": "sk-proj- filename:.env-postgres-url",
-    "key_preview": "postgresql:/***",
-    "line_number": 352,
-    "entropy": 4.788708066641326
-  },
-  {
-    "repository": "DrHaitham/PenTest2.0",
-    "file_path": "DrHaitham-PenTest2.0-6084859/rag_storage/PayloadsAllTheThingsMarkdownFiles/SQLmap.md",
-    "file_url": "https://github.com/DrHaitham/PenTest2.0/blob/main/DrHaitham-PenTest2.0-6084859/rag_storage/PayloadsAllTheThingsMarkdownFiles/SQLmap.md",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T12:20:41.418350422+00:00",
-    "key_type": "sk-proj- filename:.env-mysql-url",
-    "key_preview": "mysql://user***",
-    "line_number": 343,
-    "entropy": 3.8109283062792874
+    "discovered_at": "2026-07-31T14:42:46.916908348+00:00",
+    "key_type": "sk-proj- filename:.env-groq",
+    "key_preview": "gsk_Lm9o6HPP***",
+    "line_number": 2,
+    "entropy": 5.088343091584563
   }
 ]
