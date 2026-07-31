@@ -1,123 +1,79 @@
 [
   {
-    "repository": "kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag",
-    "file_path": "kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/.env.examples",
-    "file_url": "https://github.com/kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag/blob/main/kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/.env.examples",
+    "repository": "bilalmachraa82/aiti-assistant",
+    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/.env.example",
+    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/.env.example",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:45.702825334+00:00",
-    "key_type": "sk-proj- filename:.env-supabase-service",
-    "key_preview": "your-supabas***",
-    "line_number": 14,
-    "entropy": 3.6234651896016468
-  },
-  {
-    "repository": "kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag",
-    "file_path": "kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/.env.examples",
-    "file_url": "https://github.com/kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag/blob/main/kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/.env.examples",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:45.703200508+00:00",
-    "key_type": "sk-proj- filename:.env-tavily-env",
-    "key_preview": "tvly-dev-you***",
-    "line_number": 18,
-    "entropy": 3.594465636961452
-  },
-  {
-    "repository": "kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag",
-    "file_path": "kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/Agente-Basico-B-con-Historico-de-Conversacion/__pycache__/agente_basico_conversation_history.cpython-311.pyc",
-    "file_url": "https://github.com/kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag/blob/main/kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/Agente-Basico-B-con-Historico-de-Conversacion/__pycache__/agente_basico_conversation_history.cpython-311.pyc",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:45.705168809+00:00",
-    "key_type": "sk-proj- filename:.env-postgres-url",
-    "key_preview": "postgresql:/***",
+    "discovered_at": "2026-07-31T12:20:40.146023608+00:00",
+    "key_type": "sk-proj- filename:.env-database-url",
+    "key_preview": "sqlite:///./***",
     "line_number": 19,
-    "entropy": 3.8239348962840567
+    "entropy": 3.3401998765158556
   },
   {
-    "repository": "kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag",
-    "file_path": "kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/Agente-Basico-B-con-Historico-de-Conversacion/agente_basico_conversation_history.py",
-    "file_url": "https://github.com/kpzaolod6000/AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag/blob/main/kpzaolod6000-AI_developer_ai13-LangchainLLM-session3_agentmultitools_rag-b4c0c7c/Agente-Basico-B-con-Historico-de-Conversacion/agente_basico_conversation_history.py",
+    "repository": "bilalmachraa82/aiti-assistant",
+    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/.env.railway",
+    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/.env.railway",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:45.704037621+00:00",
+    "discovered_at": "2026-07-31T12:20:40.148068470+00:00",
+    "key_type": "sk-proj- filename:.env-database-url",
+    "key_preview": "sqlite:////a***",
+    "line_number": 25,
+    "entropy": 3.3837930573985107
+  },
+  {
+    "repository": "bilalmachraa82/aiti-assistant",
+    "file_path": "bilalmachraa82-aiti-assistant-a0b456f/README.md",
+    "file_url": "https://github.com/bilalmachraa82/aiti-assistant/blob/main/bilalmachraa82-aiti-assistant-a0b456f/README.md",
+    "commit_sha": null,
+    "discovered_at": "2026-07-31T12:20:40.158094987+00:00",
+    "key_type": "sk-proj- filename:.env-database-url",
+    "key_preview": "sqlite:///./***",
+    "line_number": 69,
+    "entropy": 3.366091329119192
+  },
+  {
+    "repository": "iceener/aidevs-deeper",
+    "file_path": "iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
+    "file_url": "https://github.com/iceener/aidevs-deeper/blob/main/iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
+    "commit_sha": null,
+    "discovered_at": "2026-07-31T12:20:40.655291932+00:00",
     "key_type": "sk-proj- filename:.env-postgres-url",
     "key_preview": "postgresql:/***",
-    "line_number": 48,
-    "entropy": 4.7517751811342785
+    "line_number": 171,
+    "entropy": 4.047562138070836
   },
   {
-    "repository": "ed-tech-at/prompting-schule",
-    "file_path": "ed-tech-at-prompting-schule-8388038/SETUP.md",
-    "file_url": "https://github.com/ed-tech-at/prompting-schule/blob/main/ed-tech-at-prompting-schule-8388038/SETUP.md",
+    "repository": "iceener/aidevs-deeper",
+    "file_path": "iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
+    "file_url": "https://github.com/iceener/aidevs-deeper/blob/main/iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite-migrations.mdc",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:46.236970821+00:00",
+    "discovered_at": "2026-07-31T12:20:40.678774290+00:00",
+    "key_type": "sk-proj- filename:.env-postgres-url",
+    "key_preview": "postgres://u***",
+    "line_number": 858,
+    "entropy": 3.735687824737577
+  },
+  {
+    "repository": "iceener/aidevs-deeper",
+    "file_path": "iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite.mdc",
+    "file_url": "https://github.com/iceener/aidevs-deeper/blob/main/iceener-aidevs-deeper-dbb1080/.cursor/rules/drizzle/sqlite.mdc",
+    "commit_sha": null,
+    "discovered_at": "2026-07-31T12:20:40.663900849+00:00",
     "key_type": "sk-proj- filename:.env-postgres-url",
     "key_preview": "postgresql:/***",
-    "line_number": 50,
-    "entropy": 4.84385426180103
+    "line_number": 352,
+    "entropy": 4.788708066641326
   },
   {
-    "repository": "ed-tech-at/prompting-schule",
-    "file_path": "ed-tech-at-prompting-schule-8388038/SETUP.md",
-    "file_url": "https://github.com/ed-tech-at/prompting-schule/blob/main/ed-tech-at-prompting-schule-8388038/SETUP.md",
+    "repository": "DrHaitham/PenTest2.0",
+    "file_path": "DrHaitham-PenTest2.0-6084859/rag_storage/PayloadsAllTheThingsMarkdownFiles/SQLmap.md",
+    "file_url": "https://github.com/DrHaitham/PenTest2.0/blob/main/DrHaitham-PenTest2.0-6084859/rag_storage/PayloadsAllTheThingsMarkdownFiles/SQLmap.md",
     "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:46.237236600+00:00",
-    "key_type": "sk-proj- filename:.env-postgres-url",
-    "key_preview": "postgresql:/***",
-    "line_number": 51,
-    "entropy": 4.8105502452546345
-  },
-  {
-    "repository": "genialityco/photo-booth",
-    "file_path": "genialityco-photo-booth-b131ea3/README.env.md",
-    "file_url": "https://github.com/genialityco/photo-booth/blob/main/genialityco-photo-booth-b131ea3/README.env.md",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:48.788332545+00:00",
-    "key_type": "sk-proj- filename:.env-private-key",
-    "key_preview": "-----BEGIN P***",
-    "line_number": 24,
-    "entropy": 3.200288670643577
-  },
-  {
-    "repository": "faysal-MMII/Tafseer",
-    "file_path": "faysal-MMII-Tafseer-35eab2a/.env.save",
-    "file_url": "https://github.com/faysal-MMII/Tafseer/blob/main/faysal-MMII-Tafseer-35eab2a/.env.save",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:51.345973367+00:00",
-    "key_type": "sk-proj- filename:.env-openai-legacy",
-    "key_preview": "sk-proj--ddn***",
-    "line_number": 1,
-    "entropy": 5.774824059640709
-  },
-  {
-    "repository": "faysal-MMII/Tafseer",
-    "file_path": "faysal-MMII-Tafseer-35eab2a/android/app/google-services.json",
-    "file_url": "https://github.com/faysal-MMII/Tafseer/blob/main/faysal-MMII-Tafseer-35eab2a/android/app/google-services.json",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:51.516202128+00:00",
-    "key_type": "sk-proj- filename:.env-google-api",
-    "key_preview": "AIzaSyCtHlzJ***",
-    "line_number": 18,
-    "entropy": 4.83643362900771
-  },
-  {
-    "repository": "faysal-MMII/Tafseer",
-    "file_path": "faysal-MMII-Tafseer-35eab2a/lib/firebase_options.dart",
-    "file_url": "https://github.com/faysal-MMII/Tafseer/blob/main/faysal-MMII-Tafseer-35eab2a/lib/firebase_options.dart",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:51.518155872+00:00",
-    "key_type": "sk-proj- filename:.env-google-api",
-    "key_preview": "AIzaSyBPpkMW***",
-    "line_number": 42,
-    "entropy": 4.977709911169939
-  },
-  {
-    "repository": "faysal-MMII/Tafseer",
-    "file_path": "faysal-MMII-Tafseer-35eab2a/lib/firebase_options.dart",
-    "file_url": "https://github.com/faysal-MMII/Tafseer/blob/main/faysal-MMII-Tafseer-35eab2a/lib/firebase_options.dart",
-    "commit_sha": null,
-    "discovered_at": "2026-07-31T10:12:51.519074826+00:00",
-    "key_type": "sk-proj- filename:.env-google-api",
-    "key_preview": "AIzaSyBtgRWD***",
-    "line_number": 60,
-    "entropy": 4.7532256162426725
+    "discovered_at": "2026-07-31T12:20:41.418350422+00:00",
+    "key_type": "sk-proj- filename:.env-mysql-url",
+    "key_preview": "mysql://user***",
+    "line_number": 343,
+    "entropy": 3.8109283062792874
   }
 ]
