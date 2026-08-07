@@ -1,8 +1,8 @@
-use anyhow::Result;
-use inquire::{Select, MultiSelect, Confirm, Text};
 use crate::dorks::{DorkPattern, DorkSource, get_github_dorks, get_raw_github_dorks};
-use crate::storage::{SecureStorage, PublicFinding, PrivateFinding};
+use crate::storage::{PrivateFinding, PublicFinding, SecureStorage};
 use crate::validator;
+use anyhow::Result;
+use inquire::{Confirm, MultiSelect, Select, Text};
 use std::collections::HashMap;
 
 pub async fn interactive_mode() -> Result<(String, usize, usize, Vec<String>)> {
@@ -67,9 +67,7 @@ pub async fn interactive_mode() -> Result<(String, usize, usize, Vec<String>)> {
         vec![]
     };
 
-    let confirm = Confirm::new("Start scan?")
-        .with_default(true)
-        .prompt()?;
+    let confirm = Confirm::new("Start scan?").with_default(true).prompt()?;
 
     if !confirm {
         return Err(anyhow::anyhow!("Scan cancelled"));
@@ -212,8 +210,7 @@ async fn export_to_csv(storage: &SecureStorage) -> Result<()> {
         println!("✅ Exported {} findings to {}", findings.len(), filename);
     } else {
         let findings = storage.load_public_findings().await?;
-        let mut csv =
-            String::from("Repository,File,Type,Preview,Entropy,Line,Discovered\n");
+        let mut csv = String::from("Repository,File,Type,Preview,Entropy,Line,Discovered\n");
 
         for f in &findings {
             csv.push_str(&format!(
@@ -257,14 +254,14 @@ async fn show_statistics(storage: &SecureStorage) -> Result<()> {
     println!("\nTop 10 key types:");
 
     let mut types: Vec<_> = by_type.into_iter().collect();
-    types.sort_by(|a, b| b.1.cmp(&a.1));
+    types.sort_by_key(|b| std::cmp::Reverse(b.1));
     for (i, (key_type, count)) in types.iter().take(10).enumerate() {
         println!("  {}. {} - {} findings", i + 1, key_type, count);
     }
 
     println!("\nTop 10 affected repositories:");
     let mut repos: Vec<_> = by_repo.into_iter().collect();
-    repos.sort_by(|a, b| b.1.cmp(&a.1));
+    repos.sort_by_key(|b| std::cmp::Reverse(b.1));
     for (i, (repo, count)) in repos.iter().take(10).enumerate() {
         println!("  {}. {} - {} findings", i + 1, repo, count);
     }
@@ -299,7 +296,10 @@ pub fn show_dork_patterns() {
         println!();
     }
 
-    println!("Web-Search Dorks (raw.githubusercontent.com) — {} patterns\n", raw_dorks.len());
+    println!(
+        "Web-Search Dorks (raw.githubusercontent.com) — {} patterns\n",
+        raw_dorks.len()
+    );
     for dork in &raw_dorks {
         println!("   • {} [{}]", dork.name, dork.risk_level);
     }

@@ -87,6 +87,16 @@ cargo build --release
 - GitHub authentication for live repository scanning
 - Internet connection for scanning and validation
 
+### Project documentation
+
+- [Architecture and runtime flow](docs/architecture.md)
+- [Configuration reference](docs/configuration.md)
+- [Dependency policy and audit](docs/dependencies.md)
+- [Testing and verification](docs/testing.md)
+- [Release verification](docs/release.md)
+- [Contributing](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
 ### Configuration
 
 Create a local `.env` file for CLI usage:

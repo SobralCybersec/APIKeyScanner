@@ -36,10 +36,56 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Test
-        run: cargo test
+        run: cargo test --all-targets
+
+      - name: Format check
+        run: cargo fmt --all -- --check
+
+      - name: Type check
+        run: cargo check --all-targets --all-features
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Version consistency
+        if: runner.os == 'Linux'
+        run: sh scripts/verify-version.sh
+
+      - name: Release tests
+        run: cargo test --release --all-targets
+
+      - name: Release build
+        run: cargo build --release
+
+  build-matrix:
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cross-platform release build
+        run: cargo build --release
 
   scan:
-    needs: verify
+    needs: [verify, build-matrix]
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -1,35 +1,87 @@
-mod dorks;
-mod storage;
 mod cli;
-mod validator;
-mod tui;
-mod launcher;
 mod config;
-mod patterns;
+mod dorks;
 mod gpu_filter;
+mod launcher;
+mod patterns;
+mod storage;
+mod tui;
+mod validator;
 
 use anyhow::Result;
 use chrono::Utc;
 use clap::Parser;
 use futures::stream::{self, StreamExt};
+use gpu_filter::GpuFilter;
 use inquire::Select;
+use patterns::API_KEY_PATTERNS;
 use rayon::prelude::*;
+use reqwest::header::{AUTHORIZATION, HeaderValue};
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::io::{Cursor, Read};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{
+    Arc,
+    atomic::{AtomicUsize, Ordering},
+};
 use std::time::{Duration, Instant};
+use storage::{PrivateFinding, PublicFinding, SecureStorage};
 use tokio::fs;
 use tokio::sync::Semaphore;
 use tracing::{error, info, warn};
-use storage::{PrivateFinding, PublicFinding, SecureStorage};
-use patterns::API_KEY_PATTERNS;
-use gpu_filter::GpuFilter;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use flate2::{Compression, write::GzEncoder};
+    use std::io::Write;
+    use tar::{Builder, Header};
+
+    #[tokio::test]
+    async fn tarball_scan_preserves_findings_without_response_copy() {
+        let content = b"OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST\n";
+        let mut archive = Builder::new(Vec::new());
+        let mut header = Header::new_gnu();
+        header.set_size(content.len() as u64);
+        header.set_mode(0o644);
+        header.set_cksum();
+        archive
+            .append_data(&mut header, "repo/.env", &content[..])
+            .unwrap();
+        let tar_data = archive.into_inner().unwrap();
+
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+        encoder.write_all(&tar_data).unwrap();
+        let gzip_data = encoder.finish().unwrap();
+
+        let filter = GpuFilter::init().await.unwrap();
+        let findings =
+            extract_and_scan_tarball(gzip_data, "org/repo".into(), "query".into(), &filter)
+                .unwrap();
+
+        assert_eq!(findings.len(), 1);
+        assert_eq!(findings[0].file_path, "repo/.env");
+        assert_eq!(
+            findings[0].full_key,
+            "sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST"
+        );
+    }
+}
 
 // ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
+
+fn parse_positive_usize(value: &str) -> Result<usize, String> {
+    let parsed = value
+        .parse::<usize>()
+        .map_err(|_| format!("{value} must be a positive integer"))?;
+    if parsed == 0 {
+        return Err("value must be greater than zero".to_string());
+    }
+    Ok(parsed)
+}
 
 #[derive(Parser)]
 #[command(name = "api-key-scanner")]
@@ -41,23 +93,39 @@ struct Cli {
     #[arg(short, long, default_value = "data")]
     output: PathBuf,
 
-    #[arg(long, default_value = "200")]
+    #[arg(
+        long,
+        default_value_t = 200,
+        value_parser = parse_positive_usize
+    )]
     max_requests: usize,
 
-    #[arg(long, default_value = "5")]
+    #[arg(
+        long,
+        default_value_t = 5,
+        value_parser = parse_positive_usize
+    )]
     concurrency: usize,
 
     #[arg(long)]
     max_minutes: Option<u64>,
 
-    #[arg(long, default_value = "30")]
+    #[arg(
+        long,
+        default_value_t = 30,
+        value_parser = parse_positive_usize
+    )]
     max_repos_per_query: usize,
 
     /// Cap on total repos scanned across the whole run. Omit to scan all found.
-    #[arg(long)]
+    #[arg(long, value_parser = parse_positive_usize)]
     max_total_repos: Option<usize>,
 
-    #[arg(long, default_value = "1")]
+    #[arg(
+        long,
+        default_value_t = 1,
+        value_parser = parse_positive_usize
+    )]
     query_loops: usize,
 
     #[arg(long)]
@@ -101,10 +169,8 @@ impl FalsePositiveFilter {
         let ll = line.to_ascii_lowercase();
 
         // UUID/GUID — only skip when not an explicitly UUID-shaped service.
-        if !label.contains("heroku") && !label.contains("pinecone") {
-            if Self::looks_like_uuid(key) {
-                return true;
-            }
+        if !label.contains("heroku") && !label.contains("pinecone") && Self::looks_like_uuid(key) {
+            return true;
         }
 
         if Self::is_placeholder(&kl) {
@@ -141,29 +207,67 @@ impl FalsePositiveFilter {
 
     fn is_placeholder(kl: &str) -> bool {
         const PLACEHOLDERS: &[&str] = &[
-            "example", "your_", "xxx", "***", "replace", "placeholder",
-            "dummy", "fake", "test123", "sample", "changeme", "todo",
-            "insert_key", "<api_key>",
+            "example",
+            "your_",
+            "xxx",
+            "***",
+            "replace",
+            "placeholder",
+            "dummy",
+            "fake",
+            "test123",
+            "sample",
+            "changeme",
+            "todo",
+            "insert_key",
+            "<api_key>",
         ];
         const EXACT: &[&str] = &[
             "0000000000000000000000000000000000000000",
             "1111111111111111111111111111111111111111",
         ];
 
-        PLACEHOLDERS.iter().any(|p| kl.contains(p)) || EXACT.contains(&kl.as_ref())
+        PLACEHOLDERS.iter().any(|p| kl.contains(p)) || EXACT.contains(&kl)
     }
 
     fn has_benign_context(ll: &str) -> bool {
         const BENIGN: &[&str] = &[
-            "public_key", "public_token", "api_version", "client_version",
-            "secret_name", "key_name", "token_name", "client_name",
-            "api_id", "key_id", "primary_key", "foreign_key",
-            "natural_key", "bucket_key", "schema_key", "sequence_key",
-            "monkey", "donkey", "keyboard", "keystone",
-            "rapid", "capital", "author", "accessor",
-            "key_up", "key_down", "key_left", "key_right",
-            "key_code", "key_frame", "key_alias", "key_ring",
-            "keystore", "key_vault_id", "key_vault_name", "issuerkeyhash",
+            "public_key",
+            "public_token",
+            "api_version",
+            "client_version",
+            "secret_name",
+            "key_name",
+            "token_name",
+            "client_name",
+            "api_id",
+            "key_id",
+            "primary_key",
+            "foreign_key",
+            "natural_key",
+            "bucket_key",
+            "schema_key",
+            "sequence_key",
+            "monkey",
+            "donkey",
+            "keyboard",
+            "keystone",
+            "rapid",
+            "capital",
+            "author",
+            "accessor",
+            "key_up",
+            "key_down",
+            "key_left",
+            "key_right",
+            "key_code",
+            "key_frame",
+            "key_alias",
+            "key_ring",
+            "keystore",
+            "key_vault_id",
+            "key_vault_name",
+            "issuerkeyhash",
         ];
         BENIGN.iter().any(|b| ll.contains(b))
     }
@@ -187,12 +291,10 @@ fn calculate_entropy(s: &str) -> f64 {
         return 0.0;
     }
     let len = valid as f64;
-    freq.iter()
-        .filter(|&&c| c > 0)
-        .fold(0.0, |acc, &c| {
-            let p = c as f64 / len;
-            acc - p * p.log2()
-        })
+    freq.iter().filter(|&&c| c > 0).fold(0.0, |acc, &c| {
+        let p = c as f64 / len;
+        acc - p * p.log2()
+    })
 }
 
 /// Extract the last non-empty capture group, falling back to the full match.
@@ -210,14 +312,12 @@ fn response_snippet(body: &str) -> String {
     body.chars()
         .take(180)
         .collect::<String>()
-        .replace('\n', " ")
-        .replace('\r', " ")
+        .replace(['\n', '\r'], " ")
 }
 
 fn strip_xml_tags(input: &str) -> String {
-    static TAG_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
-        regex::Regex::new(r"<[^>]+>").expect("xml tag regex is valid")
-    });
+    static TAG_RE: std::sync::LazyLock<regex::Regex> =
+        std::sync::LazyLock::new(|| regex::Regex::new(r"<[^>]+>").expect("xml tag regex is valid"));
     TAG_RE.replace_all(input, " ").into_owned()
 }
 
@@ -233,7 +333,9 @@ fn extract_docx_text(bytes: &[u8]) -> String {
         "word/footer2.xml",
     ];
     parts.iter().fold(String::new(), |mut out, &name| {
-        let Ok(mut file) = archive.by_name(name) else { return out };
+        let Ok(mut file) = archive.by_name(name) else {
+            return out;
+        };
         let mut xml = String::new();
         if file.read_to_string(&mut xml).is_ok() {
             out.push_str(&strip_xml_tags(&xml));
@@ -246,20 +348,26 @@ fn extract_docx_text(bytes: &[u8]) -> String {
 fn extract_pdf_text(bytes: &[u8]) -> String {
     String::from_utf8_lossy(bytes)
         .chars()
-        .map(|c| if c.is_ascii_graphic() || c.is_whitespace() { c } else { ' ' })
+        .map(|c| {
+            if c.is_ascii_graphic() || c.is_whitespace() {
+                c
+            } else {
+                ' '
+            }
+        })
         .collect()
 }
 
-fn decode_content(path: &str, bytes: &[u8]) -> String {
+fn decode_content(path: &str, bytes: Vec<u8>) -> String {
     let lower = path.to_ascii_lowercase();
     if lower.ends_with(".docx") {
-        return extract_docx_text(bytes);
+        return extract_docx_text(&bytes);
     }
     if lower.ends_with(".pdf") {
-        return extract_pdf_text(bytes);
+        return extract_pdf_text(&bytes);
     }
-    String::from_utf8(bytes.to_vec())
-        .unwrap_or_else(|_| String::from_utf8_lossy(bytes).into_owned())
+    String::from_utf8(bytes)
+        .unwrap_or_else(|error| String::from_utf8_lossy(error.as_bytes()).into_owned())
 }
 
 // ---------------------------------------------------------------------------
@@ -270,13 +378,13 @@ const MAX_FILE_BYTES: u64 = 1_000_000;
 
 static SKIP_EXTS: &[&str] = &[".png", ".jpg", ".gif", ".zip"];
 
-fn extract_and_scan_tarball(
-    bytes: Vec<u8>,
+fn extract_and_scan_tarball<B: AsRef<[u8]>>(
+    bytes: B,
     repo_name: String,
     query_label: String,
     filter: &GpuFilter,
 ) -> Result<Vec<PrivateFinding>> {
-    let decoder = flate2::read::GzDecoder::new(&bytes[..]);
+    let decoder = flate2::read::GzDecoder::new(bytes.as_ref());
     let mut archive = tar::Archive::new(decoder);
 
     // Collect all scannable file contents first so rayon can parallelise them.
@@ -296,7 +404,7 @@ fn extract_and_scan_tarball(
             continue;
         }
 
-        let mut raw = Vec::new();
+        let mut raw = Vec::with_capacity(entry.size() as usize);
         if entry.read_to_end(&mut raw).is_err() {
             continue;
         }
@@ -306,7 +414,7 @@ fn extract_and_scan_tarball(
             continue;
         }
 
-        let content = decode_content(&path, &raw);
+        let content = decode_content(&path, raw);
         if content.trim().is_empty() {
             continue;
         }
@@ -322,11 +430,16 @@ fn extract_and_scan_tarball(
         .flat_map(|(path, content)| {
             let mut local_findings: Vec<PrivateFinding> = Vec::new();
             let mut seen_keys: HashSet<String> = HashSet::new();
+            let file_url = format!("https://github.com/{}/blob/main/{}", repo_name, path);
+            let discovered_at = Utc::now().to_rfc3339();
+            let key_type_prefix = format!("{}-", query_label);
 
             for (line_num, line) in content.lines().enumerate() {
                 for (pattern, label) in &*API_KEY_PATTERNS {
                     for cap in pattern.captures_iter(line) {
-                        let Some(key_str) = extract_secret_match(&cap) else { continue };
+                        let Some(key_str) = extract_secret_match(&cap) else {
+                            continue;
+                        };
 
                         if FalsePositiveFilter::is_false_positive(key_str, line, label) {
                             continue;
@@ -343,13 +456,10 @@ fn extract_and_scan_tarball(
                         local_findings.push(PrivateFinding {
                             repository: repo_name.clone(),
                             file_path: path.clone(),
-                            file_url: format!(
-                                "https://github.com/{}/blob/main/{}",
-                                repo_name, path
-                            ),
+                            file_url: file_url.clone(),
                             commit_sha: None,
-                            discovered_at: Utc::now().to_rfc3339(),
-                            key_type: format!("{}-{}", query_label, label),
+                            discovered_at: discovered_at.clone(),
+                            key_type: format!("{}{}", key_type_prefix, label),
                             full_key: key_str.to_string(),
                             key_preview: preview,
                             line_number: Some(line_num + 1),
@@ -415,7 +525,9 @@ const GITHUB_API_VERSION: &str = "2026-03-10";
 struct Scanner {
     client: reqwest::Client,
     token: String,
-    requests_made: Arc<Mutex<usize>>,
+    requests_made: Arc<AtomicUsize>,
+    search_auth_header: HeaderValue,
+    tarball_auth_header: HeaderValue,
     max_requests: usize,
     concurrency: usize,
     semaphore: Arc<Semaphore>,
@@ -423,7 +535,7 @@ struct Scanner {
     max_duration: Option<Duration>,
     max_repos_per_query: usize,
     max_total_repos: Option<usize>,
-    repos_scanned_total: Arc<Mutex<usize>>,
+    repos_scanned_total: Arc<AtomicUsize>,
     query_loops: usize,
     /// Shared stop flag — set by the TUI 'q' key via the render loop.
     stop_flag: Arc<std::sync::atomic::AtomicBool>,
@@ -432,6 +544,7 @@ struct Scanner {
 }
 
 impl Scanner {
+    #[allow(clippy::too_many_arguments)]
     fn new(
         token: String,
         max_requests: usize,
@@ -443,6 +556,21 @@ impl Scanner {
         stop_flag: Arc<std::sync::atomic::AtomicBool>,
         gpu_filter: Arc<GpuFilter>,
     ) -> Result<Self> {
+        if max_requests == 0 {
+            return Err(anyhow::anyhow!("max_requests must be greater than zero"));
+        }
+        if concurrency == 0 {
+            return Err(anyhow::anyhow!("concurrency must be greater than zero"));
+        }
+        if max_repos_per_query == 0 {
+            return Err(anyhow::anyhow!(
+                "max_repos_per_query must be greater than zero"
+            ));
+        }
+        if max_total_repos == Some(0) {
+            return Err(anyhow::anyhow!("max_total_repos must be greater than zero"));
+        }
+
         let client = reqwest::Client::builder()
             .user_agent("APIKeyScanner-Rust/2.2")
             .timeout(Duration::from_secs(30))
@@ -451,11 +579,15 @@ impl Scanner {
             .pool_idle_timeout(Duration::from_secs(30))
             .gzip(true)
             .build()?;
+        let search_auth_header = HeaderValue::from_str(&format!("Bearer {}", token))?;
+        let tarball_auth_header = HeaderValue::from_str(&format!("token {}", token))?;
 
         Ok(Self {
             client,
             token,
-            requests_made: Arc::new(Mutex::new(0)),
+            requests_made: Arc::new(AtomicUsize::new(0)),
+            search_auth_header,
+            tarball_auth_header,
             max_requests,
             concurrency,
             semaphore: Arc::new(Semaphore::new(concurrency)),
@@ -463,7 +595,7 @@ impl Scanner {
             max_duration,
             max_repos_per_query,
             max_total_repos,
-            repos_scanned_total: Arc::new(Mutex::new(0)),
+            repos_scanned_total: Arc::new(AtomicUsize::new(0)),
             query_loops: query_loops.max(1),
             stop_flag,
             gpu_filter,
@@ -473,7 +605,7 @@ impl Scanner {
     #[inline]
     fn within_time_budget(&self) -> bool {
         self.max_duration
-            .map_or(true, |limit| self.started_at.elapsed() < limit)
+            .is_none_or(|limit| self.started_at.elapsed() < limit)
     }
 
     fn can_continue(&self) -> bool {
@@ -486,31 +618,31 @@ impl Scanner {
         // Reserve headroom: each remaining query needs at least 1 search
         // request + 1 tarball request, so stop issuing new work when the
         // budget is exhausted rather than mid-batch.
-        if *self.requests_made.lock().expect("requests_made mutex poisoned") >= self.max_requests {
+        if self.requests_made.load(Ordering::Relaxed) >= self.max_requests {
             return false;
         }
-        if let Some(cap) = self.max_total_repos {
-            if *self.repos_scanned_total.lock().expect("repos_scanned_total mutex poisoned") >= cap {
-                return false;
-            }
+        if let Some(cap) = self.max_total_repos
+            && self.repos_scanned_total.load(Ordering::Relaxed) >= cap
+        {
+            return false;
         }
         true
     }
 
     fn increment_repos_scanned(&self) {
-        *self.repos_scanned_total.lock().expect("repos_scanned_total mutex poisoned") += 1;
+        self.repos_scanned_total.fetch_add(1, Ordering::Relaxed);
     }
 
     fn repos_scanned_so_far(&self) -> usize {
-        *self.repos_scanned_total.lock().expect("repos_scanned_total mutex poisoned")
+        self.repos_scanned_total.load(Ordering::Relaxed)
     }
 
     fn increment_requests(&self) {
-        *self.requests_made.lock().expect("requests_made mutex poisoned") += 1;
+        self.requests_made.fetch_add(1, Ordering::Relaxed);
     }
 
     fn requests_so_far(&self) -> usize {
-        *self.requests_made.lock().expect("requests_made mutex poisoned")
+        self.requests_made.load(Ordering::Relaxed)
     }
 
     /// Search GitHub code and paginate through ALL result pages (up to
@@ -534,7 +666,7 @@ impl Scanner {
                 Duration::from_secs(30),
                 self.client
                     .get("https://api.github.com/search/code")
-                    .header("Authorization", format!("Bearer {}", self.token))
+                    .header(AUTHORIZATION, self.search_auth_header.clone())
                     .header("Accept", "application/vnd.github+json")
                     .header("X-GitHub-Api-Version", GITHUB_API_VERSION)
                     .query(&[
@@ -570,19 +702,29 @@ impl Scanner {
             let body = response.text().await?;
 
             match status.as_u16() {
-                401 => return Err(anyhow::anyhow!(
-                    "GitHub API authentication failed (401) for query '{}'. \
+                401 => {
+                    return Err(anyhow::anyhow!(
+                        "GitHub API authentication failed (401) for query '{}'. \
                      Provide a valid token via --token or GITHUB_TOKEN.",
-                    query
-                )),
+                        query
+                    ));
+                }
                 422 => {
-                    warn!("GitHub rejected query '{}': {}", query, response_snippet(&body));
+                    warn!(
+                        "GitHub rejected query '{}': {}",
+                        query,
+                        response_snippet(&body)
+                    );
                     break;
                 }
-                s if s >= 400 => return Err(anyhow::anyhow!(
-                    "GitHub search failed for '{}' with HTTP {}: {}",
-                    query, status, response_snippet(&body)
-                )),
+                s if s >= 400 => {
+                    return Err(anyhow::anyhow!(
+                        "GitHub search failed for '{}' with HTTP {}: {}",
+                        query,
+                        status,
+                        response_snippet(&body)
+                    ));
+                }
                 _ => {}
             }
 
@@ -599,9 +741,8 @@ impl Scanner {
                 .collect::<HashSet<_>>()
                 .len();
 
-            if page_len < 100
-                || unique_repos >= self.max_repos_per_query
-                || page >= 10  // GitHub hard cap: 1 000 results
+            if page_len < 100 || unique_repos >= self.max_repos_per_query || page >= 10
+            // GitHub hard cap: 1 000 results
             {
                 break;
             }
@@ -632,7 +773,7 @@ impl Scanner {
             Duration::from_secs(60),
             self.client
                 .get(&url)
-                .header("Authorization", format!("token {}", self.token))
+                .header(AUTHORIZATION, self.tarball_auth_header.clone())
                 .send(),
         )
         .await
@@ -646,7 +787,7 @@ impl Scanner {
             return Ok(vec![]);
         }
 
-        let bytes = response.bytes().await?.to_vec();
+        let bytes = response.bytes().await?;
         let repo_name = repo_name.to_string();
         let query_label = query_label.to_string();
         let filter = Arc::clone(&self.gpu_filter);
@@ -714,18 +855,26 @@ impl Scanner {
 
                 let repo_count = results.len();
                 if let Some(ref app) = tui_app {
-                    app.lock().await.add_log(format!("Found {} files", repo_count));
+                    app.lock()
+                        .await
+                        .add_log(format!("Found {} files", repo_count));
                 }
                 info!("Found {} files", repo_count);
 
                 // Deduplicate repositories and cap per query.
-                let repos: Vec<String> = results
-                    .iter()
-                    .filter_map(|item| item["repository"]["full_name"].as_str().map(str::to_owned))
-                    .collect::<HashSet<_>>()
-                    .into_iter()
-                    .take(self.max_repos_per_query)
-                    .collect();
+                let mut seen_repos = HashSet::with_capacity(self.max_repos_per_query);
+                let mut repos = Vec::with_capacity(self.max_repos_per_query);
+                for item in &results {
+                    let Some(repo) = item["repository"]["full_name"].as_str() else {
+                        continue;
+                    };
+                    if seen_repos.insert(repo) {
+                        repos.push(repo.to_owned());
+                        if repos.len() == self.max_repos_per_query {
+                            break;
+                        }
+                    }
+                }
 
                 if let Some(ref app) = tui_app {
                     let mut app = app.lock().await;
@@ -760,11 +909,7 @@ impl Scanner {
                                         }
                                     }
                                     if !findings.is_empty() {
-                                        warn!(
-                                            "WARNING: {}: {} key(s) found",
-                                            repo,
-                                            findings.len()
-                                        );
+                                        warn!("WARNING: {}: {} key(s) found", repo, findings.len());
                                     }
                                     findings
                                 }
@@ -792,17 +937,25 @@ impl Scanner {
                     let current_checkpoint = scanned / n;
                     if current_checkpoint > last_checkpoint_repos / n {
                         last_checkpoint_repos = scanned;
-                        info!("Checkpoint at {} repos — persisting {} finding(s)", scanned, all_findings.len());
+                        info!(
+                            "Checkpoint at {} repos — persisting {} finding(s)",
+                            scanned,
+                            all_findings.len()
+                        );
                         if let Some(ref app) = tui_app {
                             app.lock().await.add_log(format!(
                                 "Checkpoint: {} repos — {} finding(s) persisted",
-                                scanned, all_findings.len()
+                                scanned,
+                                all_findings.len()
                             ));
                         }
                         persist_and_report(&all_findings).await?;
                         if enable_validation && !all_findings.is_empty() {
                             let results = validator::test_findings(&all_findings).await?;
-                            validator::display_validation_results_with_findings(&results, &all_findings);
+                            validator::display_validation_results_with_findings(
+                                &results,
+                                &all_findings,
+                            );
                         }
                     }
                 }
@@ -830,6 +983,8 @@ impl Clone for Scanner {
             client: self.client.clone(),
             token: self.token.clone(),
             requests_made: Arc::clone(&self.requests_made),
+            search_auth_header: self.search_auth_header.clone(),
+            tarball_auth_header: self.tarball_auth_header.clone(),
             max_requests: self.max_requests,
             concurrency: self.concurrency,
             semaphore: Arc::clone(&self.semaphore),
@@ -876,18 +1031,16 @@ fn generate_readme(findings: &[PublicFinding]) -> String {
     );
 
     let mut types: Vec<_> = by_type.into_iter().collect();
-    types.sort_by(|a, b| b.1.cmp(&a.1));
+    types.sort_by_key(|b| std::cmp::Reverse(b.1));
     for (key_type, count) in types.iter().take(20) {
-        let risk = if key_type.contains("live")
-            || key_type.contains("proj")
-            || key_type.contains("aws")
-        {
-            "Critical"
-        } else if key_type.contains("test") || key_type.contains("env") {
-            "High"
-        } else {
-            "Medium"
-        };
+        let risk =
+            if key_type.contains("live") || key_type.contains("proj") || key_type.contains("aws") {
+                "Critical"
+            } else if key_type.contains("test") || key_type.contains("env") {
+                "High"
+            } else {
+                "Medium"
+            };
         out.push_str(&format!("| `{}` | {} | {} |\n", key_type, count, risk));
     }
 
@@ -897,7 +1050,7 @@ fn generate_readme(findings: &[PublicFinding]) -> String {
          |------------|----------|\n",
     );
     let mut repos: Vec<_> = by_repo.into_iter().collect();
-    repos.sort_by(|a, b| b.1.cmp(&a.1));
+    repos.sort_by_key(|b| std::cmp::Reverse(b.1));
     for (repo, count) in repos.iter().take(10) {
         out.push_str(&format!("| `{}` | {} |\n", repo, count));
     }
@@ -1030,7 +1183,14 @@ async fn run_scan_with_tui(cfg: ScanConfig) -> Result<()> {
         let tui_app_clone = Arc::clone(&tui_app);
         let scan_handle = tokio::spawn(async move {
             scanner
-                .scan(use_dorks, full_scan, queries_opt, Some(tui_app_clone), validate_every, enable_val)
+                .scan(
+                    use_dorks,
+                    full_scan,
+                    queries_opt,
+                    Some(tui_app_clone),
+                    validate_every,
+                    enable_val,
+                )
                 .await
         });
 
@@ -1046,7 +1206,9 @@ async fn run_scan_with_tui(cfg: ScanConfig) -> Result<()> {
                     last_tick = Instant::now();
                 }
                 let save = app.save_requested;
-                if save { app.save_requested = false; }
+                if save {
+                    app.save_requested = false;
+                }
                 // Wire 'q' stop_requested into the atomic flag so the scanner
                 // task sees it immediately via can_continue().
                 if app.stop_requested {
@@ -1058,7 +1220,10 @@ async fn run_scan_with_tui(cfg: ScanConfig) -> Result<()> {
             // Bug fix: 's' saves the live in-memory accumulator, not stale disk snapshot.
             if do_save && !all_findings.is_empty() {
                 let _ = persist_and_report(&all_findings).await;
-                tui_app.lock().await.add_log(format!("Saved {} finding(s)", all_findings.len()));
+                tui_app
+                    .lock()
+                    .await
+                    .add_log(format!("Saved {} finding(s)", all_findings.len()));
             }
 
             if scan_handle.is_finished() || should_stop {
@@ -1090,7 +1255,10 @@ async fn run_scan_with_tui(cfg: ScanConfig) -> Result<()> {
         if !all_findings.is_empty() {
             persist_and_report(&all_findings).await?;
             if (cfg.enable_validation || user_stopped) && new_count > 0 {
-                tui_app.lock().await.add_log(format!("Validating {} key(s)...", all_findings.len()));
+                tui_app
+                    .lock()
+                    .await
+                    .add_log(format!("Validating {} key(s)...", all_findings.len()));
                 let results = validator::test_findings(&all_findings).await?;
                 validator::display_validation_results_with_findings(&results, &all_findings);
             }
@@ -1101,9 +1269,10 @@ async fn run_scan_with_tui(cfg: ScanConfig) -> Result<()> {
             break 'endless;
         }
         if new_count == 0 {
-            tui_app.lock().await.add_log(
-                "No new findings this pass — stopping endless loop".to_string()
-            );
+            tui_app
+                .lock()
+                .await
+                .add_log("No new findings this pass — stopping endless loop".to_string());
             break 'endless;
         }
 
@@ -1195,8 +1364,8 @@ async fn run_interactive_launcher(gpu_filter: Arc<GpuFilter>) -> Result<()> {
             s if s.starts_with("View Previous Findings") => loop {
                 match cli::view_findings_menu().await {
                     Ok(_) => {
-                        let ans = Select::new("Continue?", vec!["View more", "Back to menu"])
-                            .prompt()?;
+                        let ans =
+                            Select::new("Continue?", vec!["View more", "Back to menu"]).prompt()?;
                         if ans == "Back to menu" {
                             break;
                         }
@@ -1273,7 +1442,7 @@ async fn main() -> Result<()> {
             .all(|a| !a.starts_with("--token") && !a.starts_with("-t"));
 
     let has_explicit_args = (cli.token.is_some() && !token_from_env)
-        || cli.output != PathBuf::from("data")
+        || cli.output.as_os_str() != "data"
         || cli.max_requests != 200
         || cli.concurrency != 5
         || cli.max_minutes.is_some()
@@ -1334,7 +1503,9 @@ async fn main() -> Result<()> {
     let (token, max_requests, concurrency, selected_queries) = if cli.interactive {
         cli::interactive_mode().await?
     } else {
-        let token = cli.token.ok_or_else(|| anyhow::anyhow!("GitHub token required"))?;
+        let token = cli
+            .token
+            .ok_or_else(|| anyhow::anyhow!("GitHub token required"))?;
         (token, cli.max_requests, cli.concurrency, vec![])
     };
 
@@ -1358,8 +1529,13 @@ async fn main() -> Result<()> {
 
     if cli.no_tui || cli.interactive {
         info!("API Key Scanner v2.2 (Rust Edition)");
-        info!("Budget: {} req/pass | Concurrency: {}", cfg.max_requests, cfg.concurrency);
-        if cfg.endless_loop { info!("Endless loop enabled — Ctrl-C to stop"); }
+        info!(
+            "Budget: {} req/pass | Concurrency: {}",
+            cfg.max_requests, cfg.concurrency
+        );
+        if cfg.endless_loop {
+            info!("Endless loop enabled — Ctrl-C to stop");
+        }
 
         let mut all_findings: Vec<PrivateFinding> = Vec::new();
         let mut seen_keys: HashSet<String> = HashSet::new();
@@ -1372,7 +1548,14 @@ async fn main() -> Result<()> {
             let scanner = cfg.build_scanner()?;
             let queries_opt = cfg.queries_opt();
             let pass_findings = scanner
-                .scan(cfg.use_dorks, cfg.full_scan, queries_opt, None, cfg.validate_every_n_repos, cfg.enable_validation)
+                .scan(
+                    cfg.use_dorks,
+                    cfg.full_scan,
+                    queries_opt,
+                    None,
+                    cfg.validate_every_n_repos,
+                    cfg.enable_validation,
+                )
                 .await?;
 
             let new_findings: Vec<PrivateFinding> = pass_findings
@@ -1392,7 +1575,9 @@ async fn main() -> Result<()> {
                 }
             }
 
-            if !cfg.endless_loop { break; }
+            if !cfg.endless_loop {
+                break;
+            }
             if new_count == 0 {
                 info!("No new findings — stopping endless loop");
                 break;

@@ -10,7 +10,7 @@ pub struct ScannerConfig {
 
     #[serde(default = "default_max_requests")]
     pub max_requests: usize,
-    
+
     #[serde(default = "default_concurrency")]
     pub concurrency: usize,
 
@@ -26,19 +26,19 @@ pub struct ScannerConfig {
 
     #[serde(default = "default_query_loops")]
     pub query_loops: usize,
-    
+
     #[serde(default = "default_output_path")]
     pub output_path: String,
-    
+
     #[serde(default)]
     pub scan_mode: ScanMode,
-    
+
     #[serde(default)]
     pub custom_queries: Vec<String>,
-    
+
     #[serde(default)]
     pub enable_validation: bool,
-    
+
     #[serde(default)]
     pub enable_tui: bool,
 
@@ -56,19 +56,14 @@ pub struct ScannerConfig {
     pub endless_loop: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum ScanMode {
+    #[default]
     TimeSlotted,
     FullScan,
     GoogleDorks,
     CustomQueries,
-}
-
-impl Default for ScanMode {
-    fn default() -> Self {
-        Self::TimeSlotted
-    }
 }
 
 impl ScanMode {
@@ -79,7 +74,7 @@ impl ScanMode {
             _ => (false, false),
         }
     }
-    
+
     pub fn description(&self) -> &str {
         match self {
             ScanMode::TimeSlotted => "Baseline scan (all core queries)",
@@ -90,17 +85,31 @@ impl ScanMode {
     }
 }
 
-fn default_max_requests() -> usize { 200 }
-fn default_concurrency() -> usize { 5 }
-fn default_max_repos_per_query() -> usize { 30 }
-fn default_query_loops() -> usize { 1 }
-fn default_output_path() -> String { "data".to_string() }
+fn default_max_requests() -> usize {
+    200
+}
+fn default_concurrency() -> usize {
+    5
+}
+fn default_max_repos_per_query() -> usize {
+    30
+}
+fn default_query_loops() -> usize {
+    1
+}
+fn default_output_path() -> String {
+    "data".to_string()
+}
 
 /// Default: no mid-scan validation checkpoints.
-pub fn no_validation_checkpoint() -> Option<usize> { None }
+pub fn no_validation_checkpoint() -> Option<usize> {
+    None
+}
 
 /// `None` means "scan all repos found" — the default behaviour.
-pub fn no_repo_cap() -> Option<usize> { None }
+pub fn no_repo_cap() -> Option<usize> {
+    None
+}
 
 impl Default for ScannerConfig {
     fn default() -> Self {
@@ -127,33 +136,55 @@ impl ScannerConfig {
     pub fn config_path() -> PathBuf {
         PathBuf::from("scanner-config.toml")
     }
-    
+
     pub async fn load() -> Result<Self> {
         let path = Self::config_path();
-        
+
         if !path.exists() {
             return Ok(Self::default());
         }
-        
+
         let content = fs::read_to_string(&path).await?;
         let config: Self = toml::from_str(&content)?;
+        config.validate()?;
         Ok(config)
     }
-    
+
     pub async fn save(&self) -> Result<()> {
+        self.validate()?;
         let path = Self::config_path();
         let content = toml::to_string_pretty(self)?;
         fs::write(&path, content).await?;
         Ok(())
     }
-    
+
     pub async fn exists() -> bool {
         Self::config_path().exists()
     }
-    
+
     #[allow(dead_code)]
     pub fn to_toml_string(&self) -> Result<String> {
+        self.validate()?;
         Ok(toml::to_string_pretty(self)?)
+    }
+
+    pub fn validate(&self) -> Result<()> {
+        if self.max_requests == 0 {
+            anyhow::bail!("max_requests must be greater than zero");
+        }
+        if self.concurrency == 0 {
+            anyhow::bail!("concurrency must be greater than zero");
+        }
+        if self.max_repos_per_query == 0 {
+            anyhow::bail!("max_repos_per_query must be greater than zero");
+        }
+        if self.max_total_repos == Some(0) {
+            anyhow::bail!("max_total_repos must be greater than zero");
+        }
+        if self.query_loops == 0 {
+            anyhow::bail!("query_loops must be greater than zero");
+        }
+        Ok(())
     }
 }
 
@@ -202,13 +233,14 @@ enable_validation = false
 
 # Enable TUI (Terminal User Interface) mode
 enable_tui = true
-"#.to_string()
+"#
+    .to_string()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_default_config() {
         let config = ScannerConfig::default();
@@ -217,12 +249,27 @@ mod tests {
         assert_eq!(config.scan_mode, ScanMode::TimeSlotted);
         assert_eq!(config.validate_every_n_repos, None);
     }
-    
+
     #[test]
     fn test_serialize_deserialize() {
         let config = ScannerConfig::default();
         let toml_str = config.to_toml_string().unwrap();
         let deserialized: ScannerConfig = toml::from_str(&toml_str).unwrap();
         assert_eq!(config.max_requests, deserialized.max_requests);
+    }
+
+    #[test]
+    fn test_rejects_zero_limits() {
+        let config = ScannerConfig {
+            concurrency: 0,
+            ..ScannerConfig::default()
+        };
+        assert!(config.validate().is_err());
+
+        let config = ScannerConfig {
+            query_loops: 0,
+            ..ScannerConfig::default()
+        };
+        assert!(config.validate().is_err());
     }
 }

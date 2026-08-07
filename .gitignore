@@ -15,3 +15,4 @@ full_keys.json
 !/data/latest.json
 scanner-config.toml
 scan_report_*.md
+artifacts

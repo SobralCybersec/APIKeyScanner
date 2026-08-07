@@ -31,9 +31,8 @@ pub type PatternList = Vec<(Regex, &'static str)>;
 macro_rules! pat {
     ($re:expr, $label:expr) => {
         (
-            Regex::new($re).unwrap_or_else(|e| {
-                panic!("Failed to compile pattern for '{}': {}", $label, e)
-            }),
+            Regex::new($re)
+                .unwrap_or_else(|e| panic!("Failed to compile pattern for '{}': {}", $label, e)),
             $label,
         )
     };
@@ -91,7 +90,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"AZURE_(?:COGNITIVE|AI|FORM_RECOGNIZER|COMPUTER_VISION|TEXT_ANALYTICS)_KEY\s*[=:]\s*['"`]?([A-Fa-f0-9]{32})"#,
             "azure-ai"
         ),
-
         // ----------------------------------------------------------------
         // Anthropic (Claude)
         // ----------------------------------------------------------------
@@ -121,7 +119,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"ANTHROPIC_SESSION_ID\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "anthropic-session"
         ),
-
         // ----------------------------------------------------------------
         // Google / Gemini
         // ----------------------------------------------------------------
@@ -133,31 +130,22 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"(?:GEMINI|GOOGLE)_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "google-env"
         ),
-
         // ----------------------------------------------------------------
         // xAI (Grok)
         // ----------------------------------------------------------------
-        pat!(
-            r#"(?:^|[=:\s'"` ,(\[{])(xai-[A-Za-z0-9_-]{20,})"#,
-            "xai"
-        ),
+        pat!(r#"(?:^|[=:\s'"` ,(\[{])(xai-[A-Za-z0-9_-]{20,})"#, "xai"),
         pat!(
             r#"XAI_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "xai-env"
         ),
-
         // ----------------------------------------------------------------
         // Groq  — gsk_ prefix + exactly 52 alphanumeric chars
         // ----------------------------------------------------------------
-        pat!(
-            r#"(?:^|[=:\s'"` ,(\[{])(gsk_[A-Za-z0-9]{52})"#,
-            "groq"
-        ),
+        pat!(r#"(?:^|[=:\s'"` ,(\[{])(gsk_[A-Za-z0-9]{52})"#, "groq"),
         pat!(
             r#"GROQ_API_KEY\s*[=:]\s*['"`]?(gsk_[A-Za-z0-9]{20,}|[A-Za-z0-9_-]{20,})"#,
             "groq-env"
         ),
-
         // ----------------------------------------------------------------
         // DeepSeek
         // ----------------------------------------------------------------
@@ -165,7 +153,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"DEEPSEEK_API_KEY\s*[=:]\s*['"`]?(sk-[A-Za-z0-9_-]{20,}|[A-Za-z0-9_-]{20,})"#,
             "deepseek-env"
         ),
-
         // ----------------------------------------------------------------
         // Mistral AI
         // ----------------------------------------------------------------
@@ -173,7 +160,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"MISTRAL_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "mistral-env"
         ),
-
         // ----------------------------------------------------------------
         // Cohere
         // ----------------------------------------------------------------
@@ -181,7 +167,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"(?:COHERE_API_KEY|CO_API_KEY)\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "cohere-env"
         ),
-
         // ----------------------------------------------------------------
         // Hugging Face  — hf_ prefix is canonical
         // ----------------------------------------------------------------
@@ -193,19 +178,14 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"(?:HUGGINGFACE_API_KEY|HF_API_KEY|HF_TOKEN)\s*[=:]\s*['"`]?(hf_[A-Za-z0-9]{20,}|[A-Za-z0-9_-]{20,})"#,
             "hf-env"
         ),
-
         // ----------------------------------------------------------------
         // Replicate  — r8_ prefix
         // ----------------------------------------------------------------
-        pat!(
-            r#"(?:^|[=:\s'"` ,(\[{])(r8_[A-Za-z0-9]{37})"#,
-            "replicate"
-        ),
+        pat!(r#"(?:^|[=:\s'"` ,(\[{])(r8_[A-Za-z0-9]{37})"#, "replicate"),
         pat!(
             r#"REPLICATE_API_(?:KEY|TOKEN)\s*[=:]\s*['"`]?(r8_[A-Za-z0-9]{20,}|[A-Za-z0-9_-]{20,})"#,
             "replicate-env"
         ),
-
         // ----------------------------------------------------------------
         // Perplexity  — pplx- prefix
         // ----------------------------------------------------------------
@@ -217,7 +197,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"(?:PERPLEXITY_API_KEY|PPLX_API_KEY)\s*[=:]\s*['"`]?(pplx-[A-Za-z0-9_-]{20,}|[A-Za-z0-9_-]{20,})"#,
             "pplx-env"
         ),
-
         // ----------------------------------------------------------------
         // Together AI / AI21
         // ----------------------------------------------------------------
@@ -229,7 +208,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"AI21_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "ai21-env"
         ),
-
         // ----------------------------------------------------------------
         // Tavily (search API, popular in AI agents — 2026)
         // ----------------------------------------------------------------
@@ -241,7 +219,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"TAVILY_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "tavily-env"
         ),
-
         // ----------------------------------------------------------------
         // ElevenLabs (voice AI — heavy usage in 2026 AI apps)
         // ----------------------------------------------------------------
@@ -253,7 +230,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"ELEVENLABS_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "elevenlabs-env"
         ),
-
         // ----------------------------------------------------------------
         // AWS
         // ----------------------------------------------------------------
@@ -264,7 +240,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"AWS_SECRET_ACCESS_KEY\s*[=:]\s*['"`]?([a-zA-Z0-9/+=]{40})"#,
             "aws-secret"
         ),
-
         // ----------------------------------------------------------------
         // GitHub tokens — all canonical prefixes
         // ----------------------------------------------------------------
@@ -277,7 +252,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
         pat!(r#"ghr_[a-zA-Z0-9]{36}"#, "github-refresh"),
         // Fine-grained PAT (github_pat_ + 82+ chars)
         pat!(r#"github_pat_[A-Za-z0-9_]{82,}"#, "github-fine-grained"),
-
         // ----------------------------------------------------------------
         // Vercel  — six token types added March 2026
         // ----------------------------------------------------------------
@@ -292,13 +266,15 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"VERCEL_TOKEN\s*[=:]\s*['"`]?([a-zA-Z0-9_-]{20,})"#,
             "vercel-env"
         ),
-
         // ----------------------------------------------------------------
         // Supabase
         // ----------------------------------------------------------------
         pat!(r#"sbp_[a-zA-Z0-9]{40}"#, "supabase-personal"),
         // Publishable anon key (sb_publishable_ prefix, 2026)
-        pat!(r#"sb_publishable_[a-zA-Z0-9_-]{20,}"#, "supabase-publishable"),
+        pat!(
+            r#"sb_publishable_[a-zA-Z0-9_-]{20,}"#,
+            "supabase-publishable"
+        ),
         // JWT tokens (service role / anon keys) — anchored base64url segments
         pat!(
             r#"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}"#,
@@ -312,7 +288,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"SUPABASE_SERVICE_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "supabase-service"
         ),
-
         // ----------------------------------------------------------------
         // Cloudflare
         //
@@ -330,7 +305,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
         ),
         // Workers AI gateway token (cfut_ prefix, 2026)
         pat!(r#"cfut_[a-zA-Z0-9_-]{32,}"#, "cloudflare-workers-ai"),
-
         // ----------------------------------------------------------------
         // Databricks
         // ----------------------------------------------------------------
@@ -340,7 +314,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"DATABRICKS_TOKEN\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "databricks-env"
         ),
-
         // ----------------------------------------------------------------
         // Snowflake
         // ----------------------------------------------------------------
@@ -349,7 +322,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"SNOWFLAKE_PASSWORD\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "snowflake-env"
         ),
-
         // ----------------------------------------------------------------
         // Figma
         // ----------------------------------------------------------------
@@ -358,7 +330,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"FIGMA_(?:API_)?TOKEN\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "figma-env"
         ),
-
         // ----------------------------------------------------------------
         // LangChain / LangSmith
         // ----------------------------------------------------------------
@@ -371,7 +342,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"LANGSMITH_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "langsmith-env"
         ),
-
         // ----------------------------------------------------------------
         // Brave Search  — BSA + 40+ chars
         // ----------------------------------------------------------------
@@ -380,7 +350,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"BRAVE_(?:SEARCH_)?API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "brave-env"
         ),
-
         // ----------------------------------------------------------------
         // Doppler (secrets management)  — dp.st. prefix
         // ----------------------------------------------------------------
@@ -389,7 +358,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"DOPPLER_TOKEN\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "doppler-env"
         ),
-
         // ----------------------------------------------------------------
         // Sentry  — sntrys_ + 64 chars
         // ----------------------------------------------------------------
@@ -398,7 +366,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"SENTRY_AUTH_TOKEN\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "sentry-env"
         ),
-
         // ----------------------------------------------------------------
         // PostHog  — phc_ prefix
         // ----------------------------------------------------------------
@@ -407,7 +374,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"POSTHOG_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "posthog-env"
         ),
-
         // ----------------------------------------------------------------
         // Neon (serverless Postgres)  — neon_ prefix
         // ----------------------------------------------------------------
@@ -416,7 +382,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"NEON_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "neon-env"
         ),
-
         // ----------------------------------------------------------------
         // PlanetScale  — pscale_ prefix
         // ----------------------------------------------------------------
@@ -425,7 +390,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"PLANETSCALE_TOKEN\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "planetscale-env"
         ),
-
         // ----------------------------------------------------------------
         // Render  — rnd_ prefix
         // ----------------------------------------------------------------
@@ -434,7 +398,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"RENDER_API_KEY\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "render-env"
         ),
-
         // ----------------------------------------------------------------
         // Netlify  — nfp_ prefix
         // ----------------------------------------------------------------
@@ -443,7 +406,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"NETLIFY_AUTH_TOKEN\s*[=:]\s*['"`]?([a-zA-Z0-9_-]{20,})"#,
             "netlify-env"
         ),
-
         // ----------------------------------------------------------------
         // Tailscale  — tskey- prefix
         // ----------------------------------------------------------------
@@ -452,7 +414,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"TAILSCALE_API_KEY\s*[=:]\s*['"`]?([a-zA-Z0-9_-]{20,})"#,
             "tailscale-env"
         ),
-
         // ----------------------------------------------------------------
         // Mapbox  — sk.eyJ1 prefix (base64url JWT-like)
         // ----------------------------------------------------------------
@@ -461,7 +422,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"MAPBOX_(?:SECRET_)?(?:ACCESS_)?TOKEN\s*[=:]\s*['"`]?(sk\.[a-zA-Z0-9_-]{20,})"#,
             "mapbox-env"
         ),
-
         // ----------------------------------------------------------------
         // Weights & Biases  — wandb_v1_ prefix (2025+)
         // ----------------------------------------------------------------
@@ -470,7 +430,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"WANDB_API_KEY\s*[=:]\s*['"`]?([a-zA-Z0-9]{40,})"#,
             "wandb-env"
         ),
-
         // ----------------------------------------------------------------
         // Stability AI  — context-anchored (shares sk- with OpenAI)
         // ----------------------------------------------------------------
@@ -478,7 +437,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"STABILITY_API_KEY\s*[=:]\s*['"`]?(sk-[A-Za-z0-9_-]{20,})"#,
             "stability-env"
         ),
-
         // ----------------------------------------------------------------
         // Salesforce  — opaque access/refresh tokens
         // ----------------------------------------------------------------
@@ -486,7 +444,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"SALESFORCE_(?:ACCESS_TOKEN|CLIENT_SECRET|REFRESH_TOKEN)\s*[=:]\s*['"`]?([A-Za-z0-9_!.]{20,})"#,
             "salesforce-env"
         ),
-
         // ----------------------------------------------------------------
         // Clerk  — sk_live_ / sk_test_ (auth platform)
         // ----------------------------------------------------------------
@@ -494,7 +451,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"CLERK_SECRET_KEY\s*[=:]\s*['"`]?(sk_(?:live|test)_[a-zA-Z0-9]{20,})"#,
             "clerk-env"
         ),
-
         // ----------------------------------------------------------------
         // Infisical  — st.v<N>. prefix (secrets management)
         // ----------------------------------------------------------------
@@ -503,16 +459,11 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"INFISICAL_TOKEN\s*[=:]\s*['"`]?([a-zA-Z0-9_.-]{20,})"#,
             "infisical-env"
         ),
-
         // ----------------------------------------------------------------
         // Fal.ai  — fal_ prefix (AI inference, 2026)
         // ----------------------------------------------------------------
         pat!(r#"fal_[a-zA-Z0-9_-]{32,}"#, "fal-ai"),
-        pat!(
-            r#"FAL_KEY\s*[=:]\s*['"`]?([a-zA-Z0-9_:-]{20,})"#,
-            "fal-env"
-        ),
-
+        pat!(r#"FAL_KEY\s*[=:]\s*['"`]?([a-zA-Z0-9_:-]{20,})"#, "fal-env"),
         // ----------------------------------------------------------------
         // Shopify  — shpat_ / shpca_ / shppa_ / shpss_ (push-protected by default as of March 2026)
         // ----------------------------------------------------------------
@@ -520,7 +471,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
         pat!(r#"shpca_[a-fA-F0-9]{32}"#, "shopify-custom-app"),
         pat!(r#"shppa_[a-fA-F0-9]{32}"#, "shopify-private-app"),
         pat!(r#"shpss_[a-fA-F0-9]{32}"#, "shopify-shared-secret"),
-
         // ----------------------------------------------------------------
         // Lark / Feishu  (5 new types March 2026)
         // ----------------------------------------------------------------
@@ -529,7 +479,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"LARK_APP_SECRET\s*[=:]\s*['"`]?([A-Za-z0-9_-]{20,})"#,
             "lark-env"
         ),
-
         // ----------------------------------------------------------------
         // Slack
         // ----------------------------------------------------------------
@@ -545,22 +494,16 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"xoxa-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}"#,
             "slack-app"
         ),
-
         // ----------------------------------------------------------------
         // Stripe
         // ----------------------------------------------------------------
         pat!(r#"sk_live_[a-zA-Z0-9]{24,}"#, "stripe-live"),
         pat!(r#"sk_test_[a-zA-Z0-9]{24,}"#, "stripe-test"),
         pat!(r#"rk_live_[a-zA-Z0-9]{24,}"#, "stripe-restricted-live"),
-
         // ----------------------------------------------------------------
         // SendGrid
         // ----------------------------------------------------------------
-        pat!(
-            r#"SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}"#,
-            "sendgrid"
-        ),
-
+        pat!(r#"SG\.[a-zA-Z0-9_-]{22}\.[a-zA-Z0-9_-]{43}"#, "sendgrid"),
         // ----------------------------------------------------------------
         // Twilio
         // ----------------------------------------------------------------
@@ -570,17 +513,14 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             "twilio"
         ),
         pat!(r#"AC[a-f0-9]{32}"#, "twilio-account"),
-
         // ----------------------------------------------------------------
         // Mailgun
         // ----------------------------------------------------------------
         pat!(r#"key-[a-f0-9]{32}"#, "mailgun"),
-
         // ----------------------------------------------------------------
         // DigitalOcean
         // ----------------------------------------------------------------
         pat!(r#"dop_v1_[a-f0-9]{64}"#, "digitalocean"),
-
         // ----------------------------------------------------------------
         // Heroku  — UUID format, but ONLY when explicitly labelled
         // ----------------------------------------------------------------
@@ -588,25 +528,21 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"HEROKU_API_KEY\s*[=:]\s*['"`]?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})"#,
             "heroku-api"
         ),
-
         // ----------------------------------------------------------------
         // npm / PyPI / Docker Hub
         // ----------------------------------------------------------------
         pat!(r#"npm_[a-zA-Z0-9]{36}"#, "npm"),
         pat!(r#"pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{40,}"#, "pypi"),
         pat!(r#"dckr_pat_[a-zA-Z0-9_-]{40}"#, "docker"),
-
         // ----------------------------------------------------------------
         // Airtable  — pat + 14 alphanum + . + 64 hex (push-protected March 2026)
         // ----------------------------------------------------------------
         pat!(r#"pat[a-zA-Z0-9]{14}\.[a-f0-9]{64}"#, "airtable"),
-
         // ----------------------------------------------------------------
         // Notion
         // ----------------------------------------------------------------
         pat!(r#"secret_[a-zA-Z0-9]{43}"#, "notion"),
         pat!(r#"ntn_[a-zA-Z0-9]{50}"#, "notion-integration"),
-
         // ----------------------------------------------------------------
         // Pinecone
         // ----------------------------------------------------------------
@@ -617,7 +553,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"PINECONE_API_KEY\s*[=:]\s*['"`]?([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})"#,
             "pinecone"
         ),
-
         // ----------------------------------------------------------------
         // Database connection strings
         // ----------------------------------------------------------------
@@ -630,7 +565,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"DATABASE_URL\s*[=:]\s*['"`]?([a-z][a-z0-9+.-]*://[^\s'"`,]+)"#,
             "database-url"
         ),
-
         // ----------------------------------------------------------------
         // raw.githubusercontent.com embedded credential URLs
         //
@@ -646,7 +580,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"https?://[A-Za-z0-9_-]{20,}@raw\.githubusercontent\.com/[^\s'"`,]+"#,
             "raw-github-basic-auth-url"
         ),
-
         // ----------------------------------------------------------------
         // Private / PGP keys
         // ----------------------------------------------------------------
@@ -654,11 +587,7 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----"#,
             "private-key"
         ),
-        pat!(
-            r#"-----BEGIN PGP PRIVATE KEY BLOCK-----"#,
-            "pgp-private"
-        ),
-
+        pat!(r#"-----BEGIN PGP PRIVATE KEY BLOCK-----"#, "pgp-private"),
         // ----------------------------------------------------------------
         // JWT secrets
         // ----------------------------------------------------------------
@@ -670,7 +599,6 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"SECRET_KEY_BASE\s*[=:]\s*['"`]?([a-zA-Z0-9_+/]{32,})"#,
             "rails-secret-key-base"
         ),
-
         // ----------------------------------------------------------------
         // Generic high-entropy pattern (last resort — context-anchored)
         //
@@ -745,7 +673,9 @@ mod tests {
     #[test]
     fn openai_project() {
         let p = find_pattern("openai-project");
-        assert!(p.is_match("OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST"));
+        assert!(
+            p.is_match("OPENAI_API_KEY=sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST")
+        );
         // Must NOT match a plain sk- without the proj- prefix
         assert!(!p.is_match("sk-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567"));
     }

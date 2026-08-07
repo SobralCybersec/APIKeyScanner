@@ -24,7 +24,7 @@ pub struct PrivateFinding {
     pub commit_sha: Option<String>,
     pub discovered_at: String,
     pub key_type: String,
-    pub full_key: String,  // NEVER committed to git
+    pub full_key: String, // NEVER committed to git
     pub key_preview: String,
     pub line_number: Option<usize>,
     pub entropy: Option<f64>,
@@ -55,7 +55,7 @@ impl SecureStorage {
     pub fn new() -> Self {
         Self {
             public_dir: PathBuf::from("data"),
-            private_dir: PathBuf::from("private_keys"),  // In .gitignore
+            private_dir: PathBuf::from("private_keys"), // In .gitignore
         }
     }
 
@@ -92,5 +92,31 @@ impl SecureStorage {
         }
         let data = fs::read_to_string(path).await?;
         Ok(serde_json::from_str(&data)?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn public_finding_never_contains_full_key() {
+        let private = PrivateFinding {
+            repository: "org/repo".into(),
+            file_path: ".env".into(),
+            file_url: "https://github.com/org/repo/blob/main/.env".into(),
+            commit_sha: None,
+            discovered_at: "2026-08-07T00:00:00Z".into(),
+            key_type: "test-key".into(),
+            full_key: "secret-value".into(),
+            key_preview: "secret-***".into(),
+            line_number: Some(1),
+            entropy: Some(3.8),
+        };
+
+        let public = PublicFinding::from(&private);
+        let json = serde_json::to_string(&public).unwrap();
+        assert!(!json.contains("secret-value"));
+        assert!(json.contains("secret-***"));
     }
 }

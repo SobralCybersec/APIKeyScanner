@@ -1,6 +1,6 @@
+use crate::config::{ScanMode, ScannerConfig};
 use anyhow::Result;
 use inquire::{Confirm, CustomType, MultiSelect, Password, Select, Text};
-use crate::config::{ScannerConfig, ScanMode};
 
 #[derive(Debug, Clone)]
 pub struct LaunchConfig {
@@ -20,7 +20,7 @@ pub async fn launch_interactive_tui() -> Result<LaunchConfig> {
         let load = Confirm::new("Found existing config. Load it?")
             .with_default(true)
             .prompt()?;
-        
+
         if load {
             Some(ScannerConfig::load().await?)
         } else {
@@ -37,14 +37,15 @@ pub async fn launch_interactive_tui() -> Result<LaunchConfig> {
     config.github_token = Some(token.clone());
 
     // Step 2: Scan Configuration
-    let (max_requests, concurrency, max_minutes, max_repos_per_query, max_total_repos, query_loops) = get_scan_limits(
-        config.max_requests,
-        config.concurrency,
-        config.max_minutes,
-        config.max_repos_per_query,
-        config.max_total_repos,
-        config.query_loops,
-    )?;
+    let (max_requests, concurrency, max_minutes, max_repos_per_query, max_total_repos, query_loops) =
+        get_scan_limits(
+            config.max_requests,
+            config.concurrency,
+            config.max_minutes,
+            config.max_repos_per_query,
+            config.max_total_repos,
+            config.query_loops,
+        )?;
     config.max_requests = max_requests;
     config.concurrency = concurrency;
     config.max_minutes = max_minutes;
@@ -74,7 +75,7 @@ pub async fn launch_interactive_tui() -> Result<LaunchConfig> {
     let save_config = Confirm::new("Save this configuration for future use?")
         .with_default(true)
         .prompt()?;
-    
+
     if save_config {
         config.save().await?;
         println!("Configuration saved to scanner-config.toml\n");
@@ -99,17 +100,21 @@ pub async fn launch_interactive_tui() -> Result<LaunchConfig> {
 
 fn get_github_token(saved_token: Option<&str>) -> Result<String> {
     println!("Step 1/6: GitHub Authentication\n");
-    
+
     let has_token = Confirm::new("Do you have a GitHub Personal Access Token?")
         .with_default(true)
-        .with_help_message("Required for GitHub API access. Get one at: https://github.com/settings/tokens")
+        .with_help_message(
+            "Required for GitHub API access. Get one at: https://github.com/settings/tokens",
+        )
         .prompt()?;
 
     if !has_token {
         println!("\nYou need a GitHub token to use this scanner.");
         println!("   1. Go to: https://github.com/settings/tokens");
         println!("   2. Generate a new token (classic)");
-        println!("   3. Select scopes: 'repo' (for private repos) or 'public_repo' (for public only)");
+        println!(
+            "   3. Select scopes: 'repo' (for private repos) or 'public_repo' (for public only)"
+        );
         println!("   4. Copy the token and paste it here\n");
     }
 
@@ -126,7 +131,9 @@ fn get_github_token(saved_token: Option<&str>) -> Result<String> {
 
     let token = Password::new("GitHub Token:")
         .with_display_mode(inquire::PasswordDisplayMode::Masked)
-        .with_help_message("Saved to scanner-config.toml only if you choose to save this configuration")
+        .with_help_message(
+            "Saved to scanner-config.toml only if you choose to save this configuration",
+        )
         .prompt()?;
 
     if token.is_empty() {
@@ -137,6 +144,8 @@ fn get_github_token(saved_token: Option<&str>) -> Result<String> {
     Ok(token)
 }
 
+type ScanLimits = (usize, usize, Option<u64>, usize, Option<usize>, usize);
+
 fn get_scan_limits(
     default_requests: usize,
     default_concurrency: usize,
@@ -144,7 +153,7 @@ fn get_scan_limits(
     default_max_repos_per_query: usize,
     default_max_total_repos: Option<usize>,
     default_query_loops: usize,
-) -> Result<(usize, usize, Option<u64>, usize, Option<usize>, usize)> {
+) -> Result<ScanLimits> {
     println!("Step 2/6: Scan Limits\n");
 
     let max_requests = CustomType::<usize>::new("Max API requests:")
@@ -161,7 +170,9 @@ fn get_scan_limits(
 
     let use_time_budget = Confirm::new("Set a time budget in minutes?")
         .with_default(default_max_minutes.is_some())
-        .with_help_message("Stop scanning after the selected number of minutes, even if request budget remains")
+        .with_help_message(
+            "Stop scanning after the selected number of minutes, even if request budget remains",
+        )
         .prompt()?;
 
     let max_minutes = if use_time_budget {
@@ -170,7 +181,7 @@ fn get_scan_limits(
                 .with_default(default_max_minutes.unwrap_or(20))
                 .with_help_message("Example: 20 for a 20-minute scan window")
                 .with_error_message("Please enter a valid number of minutes")
-                .prompt()?
+                .prompt()?,
         )
     } else {
         None
@@ -178,7 +189,9 @@ fn get_scan_limits(
 
     let max_repos_per_query = CustomType::<usize>::new("Max repositories per query:")
         .with_default(default_max_repos_per_query)
-        .with_help_message("Repos scanned per search query. 30 covers most of GitHub's top results per query.")
+        .with_help_message(
+            "Repos scanned per search query. 30 covers most of GitHub's top results per query.",
+        )
         .with_error_message("Please enter a valid number")
         .prompt()?;
 
@@ -191,9 +204,11 @@ fn get_scan_limits(
         Some(
             CustomType::<usize>::new("Maximum total repositories to scan:")
                 .with_default(default_max_total_repos.unwrap_or(50))
-                .with_help_message("Scanner stops after this many repos regardless of remaining queries")
+                .with_help_message(
+                    "Scanner stops after this many repos regardless of remaining queries",
+                )
                 .with_error_message("Please enter a valid number")
-                .prompt()?
+                .prompt()?,
         )
     } else {
         None
@@ -218,7 +233,14 @@ fn get_scan_limits(
             .map(|m| format!(", {} minute time budget", m))
             .unwrap_or_default()
     );
-    Ok((max_requests, concurrency, max_minutes, max_repos_per_query, max_total_repos, query_loops))
+    Ok((
+        max_requests,
+        concurrency,
+        max_minutes,
+        max_repos_per_query,
+        max_total_repos,
+        query_loops,
+    ))
 }
 
 fn get_output_path(default_path: &str) -> Result<String> {
@@ -285,7 +307,10 @@ fn get_custom_queries(default_queries: &[String]) -> Result<Vec<String>> {
         ("OpenAI admin", "sk-admin- filename:.env"),
         ("OpenAI admin ENV", "OPENAI_ADMIN_KEY extension:env"),
         ("OpenAI project ENV", "OPENAI_PROJECT_API_KEY extension:env"),
-        ("OpenAI service-account ENV", "OPENAI_SERVICE_ACCOUNT_KEY extension:env"),
+        (
+            "OpenAI service-account ENV",
+            "OPENAI_SERVICE_ACCOUNT_KEY extension:env",
+        ),
         ("OpenAI (Python)", "sk-proj- extension:py"),
         ("OpenAI (JavaScript)", "sk-proj- extension:js"),
         ("ChatGPT/OpenAI ENV", "CHATGPT_API_KEY extension:env"),
@@ -307,31 +332,29 @@ fn get_custom_queries(default_queries: &[String]) -> Result<Vec<String>> {
         ("Replicate", "REPLICATE_API_TOKEN extension:env"),
         ("Perplexity", "PPLX_API_KEY extension:env"),
         ("Together AI", "TOGETHER_API_KEY extension:env"),
-        
         // Cloud Providers
         ("AWS Access Keys", "AKIA extension:env"),
         ("AWS Secrets", "AWS_SECRET_ACCESS_KEY extension:env"),
         ("Azure Keys", "AZURE extension:env"),
-        ("Google Cloud", "GOOGLE_APPLICATION_CREDENTIALS extension:json"),
-        
+        (
+            "Google Cloud",
+            "GOOGLE_APPLICATION_CREDENTIALS extension:json",
+        ),
         // Development Tools
         ("GitHub Tokens", "ghp_ extension:env"),
         ("GitLab Tokens", "glpat- extension:env"),
         ("Vercel Tokens", "VERCEL_TOKEN extension:env"),
         ("Supabase Keys", "SUPABASE_KEY extension:env"),
-        
         // Payment & APIs
         ("Stripe Live Keys", "sk_live_ extension:env"),
         ("Stripe Test Keys", "sk_test_ extension:env"),
         ("SendGrid Keys", "SG. extension:env"),
         ("Twilio Keys", "SK extension:env"),
-        
         // Databases
         ("MongoDB URLs", "mongodb:// extension:env"),
         ("PostgreSQL URLs", "postgres:// extension:env"),
         ("MySQL URLs", "mysql:// extension:env"),
         ("Redis URLs", "redis:// extension:env"),
-        
         // Private Keys
         ("SSH Private Keys", "BEGIN PRIVATE KEY extension:pem"),
         ("PGP Private Keys", "BEGIN PGP PRIVATE KEY"),
@@ -381,11 +404,11 @@ fn get_validation_option(default_enabled: bool) -> Result<bool> {
     if enable {
         println!("Warning: Live validation will test keys against real APIs");
         println!("   This may trigger security alerts for key owners\n");
-        
+
         let confirm = Confirm::new("Are you sure you want to enable validation?")
             .with_default(false)
             .prompt()?;
-        
+
         if confirm {
             println!("Validation enabled\n");
             Ok(true)
@@ -406,7 +429,18 @@ fn display_config_summary(config: &ScannerConfig) -> Result<()> {
     println!("║                                                           ║");
     println!("╚═══════════════════════════════════════════════════════════╝\n");
 
-    println!("GitHub Token:        {}", if config.github_token.as_deref().is_some_and(|token| !token.trim().is_empty()) { "<saved>" } else { "<not saved>" });
+    println!(
+        "GitHub Token:        {}",
+        if config
+            .github_token
+            .as_deref()
+            .is_some_and(|token| !token.trim().is_empty())
+        {
+            "<saved>"
+        } else {
+            "<not saved>"
+        }
+    );
     println!("Max Requests:        {}", config.max_requests);
     println!("Concurrency:         {}", config.concurrency);
     println!(
@@ -427,13 +461,23 @@ fn display_config_summary(config: &ScannerConfig) -> Result<()> {
     println!("Query Loops:         {}", config.query_loops);
     println!("Output Path:         {}", config.output_path);
     println!("Scan Mode:           {}", config.scan_mode.description());
-    
+
     if !config.custom_queries.is_empty() {
-        println!("Custom Queries:      {} selected", config.custom_queries.len());
+        println!(
+            "Custom Queries:      {} selected",
+            config.custom_queries.len()
+        );
     }
-    
-    println!("Validation:          {}", if config.enable_validation { "Enabled" } else { "Disabled" });
-    
+
+    println!(
+        "Validation:          {}",
+        if config.enable_validation {
+            "Enabled"
+        } else {
+            "Disabled"
+        }
+    );
+
     println!("\nEstimated Time:");
     let estimated_time = match config.scan_mode {
         ScanMode::TimeSlotted => "~1-2 minutes",
@@ -450,18 +494,18 @@ fn display_config_summary(config: &ScannerConfig) -> Result<()> {
         }
     };
     println!("   {}", estimated_time);
-    
+
     println!("\nOutput Files:");
     println!("   • data/latest.json (public findings)");
     println!("   • private_keys/full_keys.json (full keys, gitignored)");
     println!("   • README.md (statistics report)");
-    
+
     if config.enable_validation {
         println!("   • validation_results.json (validation report)");
     }
-    
+
     println!("\nConfig File: scanner-config.toml");
-    
+
     println!();
     Ok(())
 }

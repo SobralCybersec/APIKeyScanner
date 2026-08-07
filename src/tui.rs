@@ -6,6 +6,7 @@ use crossterm::{
     style::{Color, Print, ResetColor, SetForegroundColor},
     terminal::{self, ClearType},
 };
+use std::collections::VecDeque;
 use std::io::{self, Write};
 use std::time::{Duration, Instant};
 
@@ -19,7 +20,7 @@ pub struct TuiApp {
     pub high_entropy_count: usize,
     pub requests_made: usize,
     pub max_requests: usize,
-    pub logs: Vec<String>,
+    pub logs: VecDeque<String>,
     pub start_time: Instant,
     pub save_requested: bool,
     /// Set by 'q' — signals the scan task to finish its current batch then stop.
@@ -39,7 +40,7 @@ impl TuiApp {
             high_entropy_count: 0,
             requests_made: 0,
             max_requests,
-            logs: Vec::new(),
+            logs: VecDeque::with_capacity(100),
             start_time: Instant::now(),
             save_requested: false,
             stop_requested: false,
@@ -48,10 +49,11 @@ impl TuiApp {
     }
 
     pub fn add_log(&mut self, message: String) {
-        self.logs.push(format!("[{}] {}", self.elapsed_time(), message));
+        self.logs
+            .push_back(format!("[{}] {}", self.elapsed_time(), message));
         // Keep a rolling window of the last 100 log lines.
         if self.logs.len() > 100 {
-            self.logs.remove(0);
+            self.logs.pop_front();
         }
     }
 
@@ -147,8 +149,8 @@ fn render_inner(out: &mut io::Stdout, app: &TuiApp) -> Result<()> {
         Color::Green
     };
     let elapsed = app.elapsed_time();
-    let repos_per_min = app.repos_scanned as f64
-        / (app.start_time.elapsed().as_secs_f64() / 60.0).max(0.01);
+    let repos_per_min =
+        app.repos_scanned as f64 / (app.start_time.elapsed().as_secs_f64() / 60.0).max(0.01);
 
     queue!(
         out,
@@ -175,7 +177,10 @@ fn render_inner(out: &mut io::Stdout, app: &TuiApp) -> Result<()> {
     queue!(
         out,
         SetForegroundColor(Color::DarkGrey),
-        Print(format!(" {}\r\n", "─".repeat((cols as usize).saturating_sub(2)))),
+        Print(format!(
+            " {}\r\n",
+            "─".repeat((cols as usize).saturating_sub(2))
+        )),
         ResetColor,
     )?;
 
@@ -228,26 +233,44 @@ fn truncate(s: &str, max: usize) -> String {
 ///
 /// Returns `true` if the user requested quit (`q` / `Esc`).
 pub fn handle_events(app: &mut TuiApp, timeout: Duration) -> Result<bool> {
-    if event::poll(timeout)? {
-        if let Event::Key(key) = event::read()? {
-            if key.kind == KeyEventKind::Press {
-                match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc => {
-                            app.stop_requested = true;
-                            app.add_log("Stopping — finishing current batch, then saving & validating...".to_string());
-                            app.status = "Stopping after current batch...".to_string();
-                        }
-                        KeyCode::Char('p') => {
-                            app.add_log("Scan paused by user".to_string());
-                        }
-                        KeyCode::Char('s') => {
-                            app.save_requested = true;
-                            app.add_log("Save requested — flushing findings...".to_string());
-                        }
-                        _ => {}
-                    }
+    if event::poll(timeout)?
+        && let Event::Key(key) = event::read()?
+        && key.kind == KeyEventKind::Press
+    {
+        match key.code {
+            KeyCode::Char('q') | KeyCode::Esc => {
+                app.stop_requested = true;
+                app.add_log(
+                    "Stopping — finishing current batch, then saving & validating...".to_string(),
+                );
+                app.status = "Stopping after current batch...".to_string();
             }
+            KeyCode::Char('p') => {
+                app.add_log("Scan paused by user".to_string());
+            }
+            KeyCode::Char('s') => {
+                app.save_requested = true;
+                app.add_log("Save requested — flushing findings...".to_string());
+            }
+            _ => {}
         }
     }
     Ok(false)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn log_window_stays_bounded() {
+        let mut app = TuiApp::new(10);
+        for index in 0..101 {
+            app.add_log(format!("log-{index}"));
+        }
+
+        assert_eq!(app.logs.len(), 100);
+        assert!(app.logs.front().is_some_and(|line| line.contains("log-1")));
+        assert!(app.logs.back().is_some_and(|line| line.contains("log-100")));
+    }
 }

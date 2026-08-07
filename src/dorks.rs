@@ -81,254 +81,1043 @@ pub fn get_github_dorks() -> Vec<DorkPattern> {
         // ----------------------------------------------------------------
         // OpenAI
         // ----------------------------------------------------------------
-        DorkPattern::gh("OpenAI sk-proj in .env", "sk-proj- filename:.env", "OpenAI", "Critical"),
-        DorkPattern::gh("OpenAI sk-proj in Python", "sk-proj- extension:py", "OpenAI", "Critical"),
-        DorkPattern::gh("OpenAI sk-proj in JS/TS", "sk-proj- extension:js OR sk-proj- extension:ts", "OpenAI", "Critical"),
-        DorkPattern::gh("OpenAI sk-proj in notebooks", "sk-proj- extension:ipynb", "OpenAI", "Critical"),
-        DorkPattern::gh("OpenAI sk-svcacct in .env", "sk-svcacct- filename:.env", "OpenAI", "Critical"),
-        DorkPattern::gh("OpenAI sk-admin in .env", "sk-admin- filename:.env", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_API_KEY env", "OPENAI_API_KEY extension:env", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_API_KEY yaml/toml", "OPENAI_API_KEY extension:yaml OR OPENAI_API_KEY extension:toml", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_API_KEY JSON", "OPENAI_API_KEY extension:json", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_API_KEY CSV", "OPENAI_API_KEY extension:csv", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_API_KEY notebooks", "OPENAI_API_KEY extension:ipynb", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_ADMIN_KEY env", "OPENAI_ADMIN_KEY extension:env", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI_ADMIN_KEY yaml", "OPENAI_ADMIN_KEY extension:yaml", "OpenAI", "Critical"),
-        DorkPattern::gh("OPENAI project/svcacct env", "OPENAI_PROJECT_API_KEY extension:env OR OPENAI_SERVICE_ACCOUNT_KEY extension:env", "OpenAI", "Critical"),
-        DorkPattern::gh("ChatGPT/GPT aliases env", "CHATGPT_API_KEY extension:env OR GPT_API_KEY extension:env OR CODEX_API_KEY extension:env", "OpenAI", "Critical"),
-
+        DorkPattern::gh(
+            "OpenAI sk-proj in .env",
+            "sk-proj- filename:.env",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenAI sk-proj in Python",
+            "sk-proj- extension:py",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenAI sk-proj in JS/TS",
+            "sk-proj- extension:js OR sk-proj- extension:ts",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenAI sk-proj in notebooks",
+            "sk-proj- extension:ipynb",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenAI sk-svcacct in .env",
+            "sk-svcacct- filename:.env",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenAI sk-admin in .env",
+            "sk-admin- filename:.env",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_API_KEY env",
+            "OPENAI_API_KEY extension:env",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_API_KEY yaml/toml",
+            "OPENAI_API_KEY extension:yaml OR OPENAI_API_KEY extension:toml",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_API_KEY JSON",
+            "OPENAI_API_KEY extension:json",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_API_KEY CSV",
+            "OPENAI_API_KEY extension:csv",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_API_KEY notebooks",
+            "OPENAI_API_KEY extension:ipynb",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_ADMIN_KEY env",
+            "OPENAI_ADMIN_KEY extension:env",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI_ADMIN_KEY yaml",
+            "OPENAI_ADMIN_KEY extension:yaml",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OPENAI project/svcacct env",
+            "OPENAI_PROJECT_API_KEY extension:env OR OPENAI_SERVICE_ACCOUNT_KEY extension:env",
+            "OpenAI",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "ChatGPT/GPT aliases env",
+            "CHATGPT_API_KEY extension:env OR GPT_API_KEY extension:env OR CODEX_API_KEY extension:env",
+            "OpenAI",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // Anthropic
         // ----------------------------------------------------------------
-        DorkPattern::gh("ANTHROPIC_API_KEY env", "ANTHROPIC_API_KEY extension:env", "Anthropic", "Critical"),
-        DorkPattern::gh("ANTHROPIC_API_KEY yaml/toml", "ANTHROPIC_API_KEY extension:yaml OR ANTHROPIC_API_KEY extension:toml", "Anthropic", "Critical"),
-        DorkPattern::gh("ANTHROPIC_API_KEY JSON", "ANTHROPIC_API_KEY extension:json", "Anthropic", "Critical"),
-        DorkPattern::gh("ANTHROPIC_API_KEY CSV", "ANTHROPIC_API_KEY extension:csv", "Anthropic", "Critical"),
-        DorkPattern::gh("ANTHROPIC_API_KEY notebooks", "ANTHROPIC_API_KEY extension:ipynb", "Anthropic", "Critical"),
-        DorkPattern::gh("sk-ant- in Python", "sk-ant- extension:py", "Anthropic", "Critical"),
-        DorkPattern::gh("sk-ant- in JS/TS", "sk-ant- extension:js OR sk-ant- extension:ts", "Anthropic", "Critical"),
-        DorkPattern::gh("sk-ant- in .env", "sk-ant- filename:.env", "Anthropic", "Critical"),
-        DorkPattern::gh("CLAUDE_API_KEY env", "CLAUDE_API_KEY extension:env OR CLAUDE_API_TOKEN extension:env", "Anthropic", "Critical"),
-        DorkPattern::gh("CLAUDE_CODE_API_KEY", "CLAUDE_CODE_API_KEY extension:env", "Anthropic", "Critical"),
-
+        DorkPattern::gh(
+            "ANTHROPIC_API_KEY env",
+            "ANTHROPIC_API_KEY extension:env",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "ANTHROPIC_API_KEY yaml/toml",
+            "ANTHROPIC_API_KEY extension:yaml OR ANTHROPIC_API_KEY extension:toml",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "ANTHROPIC_API_KEY JSON",
+            "ANTHROPIC_API_KEY extension:json",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "ANTHROPIC_API_KEY CSV",
+            "ANTHROPIC_API_KEY extension:csv",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "ANTHROPIC_API_KEY notebooks",
+            "ANTHROPIC_API_KEY extension:ipynb",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "sk-ant- in Python",
+            "sk-ant- extension:py",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "sk-ant- in JS/TS",
+            "sk-ant- extension:js OR sk-ant- extension:ts",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "sk-ant- in .env",
+            "sk-ant- filename:.env",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "CLAUDE_API_KEY env",
+            "CLAUDE_API_KEY extension:env OR CLAUDE_API_TOKEN extension:env",
+            "Anthropic",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "CLAUDE_CODE_API_KEY",
+            "CLAUDE_CODE_API_KEY extension:env",
+            "Anthropic",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // 2026 AI providers
         // ----------------------------------------------------------------
-        DorkPattern::gh("Groq env", "GROQ_API_KEY extension:env OR gsk_ filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("DeepSeek env", "DEEPSEEK_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("Mistral env", "MISTRAL_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("Cohere env", "COHERE_API_KEY extension:env OR CO_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("Hugging Face token env", "HF_TOKEN extension:env OR HUGGINGFACE_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("Replicate token env", "REPLICATE_API_TOKEN extension:env OR r8_ filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("Perplexity env", "PERPLEXITY_API_KEY extension:env OR PPLX_API_KEY extension:env OR pplx- filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("Together AI env", "TOGETHER_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("AI21 env", "AI21_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("xAI Grok env", "XAI_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("Tavily env", "TAVILY_API_KEY extension:env OR tvly- filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("ElevenLabs env", "ELEVENLABS_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("Pinecone env", "PINECONE_API_KEY extension:env OR pcsk_ filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("LangSmith env", "LANGCHAIN_API_KEY extension:env OR LANGSMITH_API_KEY extension:env", "AI Providers", "High"),
-        DorkPattern::gh("Weights & Biases env", "WANDB_API_KEY extension:env OR wandb_v1_ filename:.env", "AI Providers", "High"),
-        DorkPattern::gh("Stability AI env", "STABILITY_API_KEY extension:env", "AI Providers", "High"),
-        DorkPattern::gh("Fal.ai env", "FAL_KEY extension:env OR fal_ filename:.env", "AI Providers", "High"),
-        DorkPattern::gh("Anthropic admin key", "ANTHROPIC_ADMIN_API_KEY extension:env OR sk-ant-admin- filename:.env", "Anthropic", "Critical"),
-
+        DorkPattern::gh(
+            "Groq env",
+            "GROQ_API_KEY extension:env OR gsk_ filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "DeepSeek env",
+            "DEEPSEEK_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Mistral env",
+            "MISTRAL_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Cohere env",
+            "COHERE_API_KEY extension:env OR CO_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Hugging Face token env",
+            "HF_TOKEN extension:env OR HUGGINGFACE_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Replicate token env",
+            "REPLICATE_API_TOKEN extension:env OR r8_ filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Perplexity env",
+            "PERPLEXITY_API_KEY extension:env OR PPLX_API_KEY extension:env OR pplx- filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Together AI env",
+            "TOGETHER_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "AI21 env",
+            "AI21_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "xAI Grok env",
+            "XAI_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Tavily env",
+            "TAVILY_API_KEY extension:env OR tvly- filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "ElevenLabs env",
+            "ELEVENLABS_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Pinecone env",
+            "PINECONE_API_KEY extension:env OR pcsk_ filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "LangSmith env",
+            "LANGCHAIN_API_KEY extension:env OR LANGSMITH_API_KEY extension:env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Weights & Biases env",
+            "WANDB_API_KEY extension:env OR wandb_v1_ filename:.env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Stability AI env",
+            "STABILITY_API_KEY extension:env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Fal.ai env",
+            "FAL_KEY extension:env OR fal_ filename:.env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Anthropic admin key",
+            "ANTHROPIC_ADMIN_API_KEY extension:env OR sk-ant-admin- filename:.env",
+            "Anthropic",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // 2026 new AI providers
         // ----------------------------------------------------------------
-        DorkPattern::gh("Cerebras API key env", "CEREBRAS_API_KEY extension:env OR csk- filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("OpenRouter API key env", "OPENROUTER_API_KEY extension:env OR sk-or- filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("NVIDIA NIM API key env", "NVIDIA_API_KEY extension:env OR nvapi- filename:.env", "AI Providers", "Critical"),
-        DorkPattern::gh("Fireworks AI key env", "FIREWORKS_API_KEY extension:env", "AI Providers", "Critical"),
-        DorkPattern::gh("SiliconFlow key env", "SILICONFLOW_API_KEY extension:env", "AI Providers", "High"),
-        DorkPattern::gh("Moonshot / Kimi key env", "MOONSHOT_API_KEY extension:env OR KIMI_API_KEY extension:env", "AI Providers", "High"),
-        DorkPattern::gh("DeepInfra key env", "DEEPINFRA_API_KEY extension:env", "AI Providers", "High"),
-        DorkPattern::gh("Cerebras key in notebooks", "CEREBRAS_API_KEY extension:ipynb", "AI Providers", "Critical"),
-        DorkPattern::gh("OpenRouter key in notebooks", "OPENROUTER_API_KEY extension:ipynb", "AI Providers", "Critical"),
-
+        DorkPattern::gh(
+            "Cerebras API key env",
+            "CEREBRAS_API_KEY extension:env OR csk- filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenRouter API key env",
+            "OPENROUTER_API_KEY extension:env OR sk-or- filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "NVIDIA NIM API key env",
+            "NVIDIA_API_KEY extension:env OR nvapi- filename:.env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Fireworks AI key env",
+            "FIREWORKS_API_KEY extension:env",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "SiliconFlow key env",
+            "SILICONFLOW_API_KEY extension:env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Moonshot / Kimi key env",
+            "MOONSHOT_API_KEY extension:env OR KIMI_API_KEY extension:env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "DeepInfra key env",
+            "DEEPINFRA_API_KEY extension:env",
+            "AI Providers",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Cerebras key in notebooks",
+            "CEREBRAS_API_KEY extension:ipynb",
+            "AI Providers",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenRouter key in notebooks",
+            "OPENROUTER_API_KEY extension:ipynb",
+            "AI Providers",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // Google / Gemini / Azure
         // ----------------------------------------------------------------
-        DorkPattern::gh("Google API key env", "GOOGLE_API_KEY filename:.env", "Google", "Critical"),
-        DorkPattern::gh("Gemini API key env", "GEMINI_API_KEY extension:env", "Google", "Critical"),
+        DorkPattern::gh(
+            "Google API key env",
+            "GOOGLE_API_KEY filename:.env",
+            "Google",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Gemini API key env",
+            "GEMINI_API_KEY extension:env",
+            "Google",
+            "Critical",
+        ),
         DorkPattern::gh("AIza key in JS", "AIza extension:js", "Google", "Critical"),
-        DorkPattern::gh("Azure OpenAI key env", "AZURE_OPENAI_KEY extension:env OR AZURE_OPENAI_API_KEY extension:yaml", "Azure", "Critical"),
-        DorkPattern::gh("Azure AI Services key", "AZURE_COGNITIVE_KEY extension:env OR AZURE_AI_KEY extension:env", "Azure", "Critical"),
-
+        DorkPattern::gh(
+            "Azure OpenAI key env",
+            "AZURE_OPENAI_KEY extension:env OR AZURE_OPENAI_API_KEY extension:yaml",
+            "Azure",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Azure AI Services key",
+            "AZURE_COGNITIVE_KEY extension:env OR AZURE_AI_KEY extension:env",
+            "Azure",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // AWS
         // ----------------------------------------------------------------
-        DorkPattern::gh("AWS access key env", "AWS_ACCESS_KEY_ID extension:env", "AWS", "Critical"),
-        DorkPattern::gh("AWS access key yaml", "aws_access_key_id extension:yaml", "AWS", "Critical"),
-        DorkPattern::gh("AWS secret key env", "AWS_SECRET_ACCESS_KEY extension:env", "AWS", "Critical"),
+        DorkPattern::gh(
+            "AWS access key env",
+            "AWS_ACCESS_KEY_ID extension:env",
+            "AWS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "AWS access key yaml",
+            "aws_access_key_id extension:yaml",
+            "AWS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "AWS secret key env",
+            "AWS_SECRET_ACCESS_KEY extension:env",
+            "AWS",
+            "Critical",
+        ),
         DorkPattern::gh("AKIA in env", "AKIA extension:env", "AWS", "Critical"),
-        DorkPattern::gh("AWS keys in notebooks", "AWS_ACCESS_KEY_ID extension:ipynb", "AWS", "Critical"),
-
+        DorkPattern::gh(
+            "AWS keys in notebooks",
+            "AWS_ACCESS_KEY_ID extension:ipynb",
+            "AWS",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // GitHub tokens
         // ----------------------------------------------------------------
-        DorkPattern::gh("GitHub PAT in env", "ghp_ filename:.env", "GitHub", "Critical"),
-        DorkPattern::gh("GitHub fine-grained PAT", "github_pat_ filename:.env", "GitHub", "Critical"),
-        DorkPattern::gh("GitHub PAT in txt", "ghp_ extension:txt", "GitHub", "Critical"),
-        DorkPattern::gh("GitHub OAuth token", "gho_ filename:.env", "GitHub", "Critical"),
-        DorkPattern::gh("GitHub server token yaml", "ghs_ extension:yaml", "GitHub", "Critical"),
-        DorkPattern::gh("GITHUB_TOKEN env", "GITHUB_TOKEN extension:env", "GitHub", "Critical"),
-
+        DorkPattern::gh(
+            "GitHub PAT in env",
+            "ghp_ filename:.env",
+            "GitHub",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GitHub fine-grained PAT",
+            "github_pat_ filename:.env",
+            "GitHub",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GitHub PAT in txt",
+            "ghp_ extension:txt",
+            "GitHub",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GitHub OAuth token",
+            "gho_ filename:.env",
+            "GitHub",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GitHub server token yaml",
+            "ghs_ extension:yaml",
+            "GitHub",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GITHUB_TOKEN env",
+            "GITHUB_TOKEN extension:env",
+            "GitHub",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // Cloud & infra
         // ----------------------------------------------------------------
-        DorkPattern::gh("DigitalOcean token env", "DIGITALOCEAN_ACCESS_TOKEN extension:env OR dop_v1_ filename:.env", "Cloud", "Critical"),
-        DorkPattern::gh("Vercel token env", "VERCEL_TOKEN filename:.env", "Cloud", "Critical"),
-        DorkPattern::gh("Cloudflare API key env", "CLOUDFLARE_API_KEY extension:env OR CLOUDFLARE_API_TOKEN extension:env", "Cloud", "Critical"),
-        DorkPattern::gh("Render API key env", "RENDER_API_KEY filename:.env", "Cloud", "High"),
-        DorkPattern::gh("Netlify token env", "NETLIFY_AUTH_TOKEN filename:.env OR nfp_ filename:.env", "Cloud", "High"),
-        DorkPattern::gh("Tailscale API key env", "TAILSCALE_API_KEY extension:env OR tskey- filename:.env", "Cloud", "High"),
-        DorkPattern::gh("Mapbox secret token env", "MAPBOX_SECRET_ACCESS_TOKEN extension:env OR MAPBOX_ACCESS_TOKEN extension:env", "Cloud", "High"),
-        DorkPattern::gh("Clerk secret key env", "CLERK_SECRET_KEY extension:env", "Cloud", "High"),
-        DorkPattern::gh("Infisical token env", "INFISICAL_TOKEN extension:env", "Cloud", "Medium"),
-
+        DorkPattern::gh(
+            "DigitalOcean token env",
+            "DIGITALOCEAN_ACCESS_TOKEN extension:env OR dop_v1_ filename:.env",
+            "Cloud",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Vercel token env",
+            "VERCEL_TOKEN filename:.env",
+            "Cloud",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Cloudflare API key env",
+            "CLOUDFLARE_API_KEY extension:env OR CLOUDFLARE_API_TOKEN extension:env",
+            "Cloud",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Render API key env",
+            "RENDER_API_KEY filename:.env",
+            "Cloud",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Netlify token env",
+            "NETLIFY_AUTH_TOKEN filename:.env OR nfp_ filename:.env",
+            "Cloud",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Tailscale API key env",
+            "TAILSCALE_API_KEY extension:env OR tskey- filename:.env",
+            "Cloud",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Mapbox secret token env",
+            "MAPBOX_SECRET_ACCESS_TOKEN extension:env OR MAPBOX_ACCESS_TOKEN extension:env",
+            "Cloud",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Clerk secret key env",
+            "CLERK_SECRET_KEY extension:env",
+            "Cloud",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Infisical token env",
+            "INFISICAL_TOKEN extension:env",
+            "Cloud",
+            "Medium",
+        ),
         // ----------------------------------------------------------------
         // Databases
         // ----------------------------------------------------------------
-        DorkPattern::gh("DATABASE_URL env", "DATABASE_URL extension:env", "Database", "High"),
-        DorkPattern::gh("MongoDB URI env", "mongodb:// filename:.env", "Database", "High"),
-        DorkPattern::gh("Postgres URI env", "postgresql:// extension:env", "Database", "High"),
-        DorkPattern::gh("MySQL URI env", "mysql:// filename:.env", "Database", "High"),
-        DorkPattern::gh("DB_PASSWORD env", "DB_PASSWORD extension:env", "Database", "High"),
-        DorkPattern::gh("Snowflake password env", "SNOWFLAKE_PASSWORD extension:env", "Database", "High"),
-        DorkPattern::gh("Databricks token env", "DATABRICKS_TOKEN filename:.env", "Database", "High"),
-        DorkPattern::gh("Neon API key", "NEON_API_KEY filename:.env", "Database", "High"),
-        DorkPattern::gh("PlanetScale token", "PLANETSCALE_TOKEN filename:.env", "Database", "High"),
-        DorkPattern::gh("Supabase service key", "SUPABASE_SERVICE_KEY extension:env", "Database", "Critical"),
-
+        DorkPattern::gh(
+            "DATABASE_URL env",
+            "DATABASE_URL extension:env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "MongoDB URI env",
+            "mongodb:// filename:.env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Postgres URI env",
+            "postgresql:// extension:env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "MySQL URI env",
+            "mysql:// filename:.env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "DB_PASSWORD env",
+            "DB_PASSWORD extension:env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Snowflake password env",
+            "SNOWFLAKE_PASSWORD extension:env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Databricks token env",
+            "DATABRICKS_TOKEN filename:.env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Neon API key",
+            "NEON_API_KEY filename:.env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "PlanetScale token",
+            "PLANETSCALE_TOKEN filename:.env",
+            "Database",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Supabase service key",
+            "SUPABASE_SERVICE_KEY extension:env",
+            "Database",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // SaaS / third-party services
         // ----------------------------------------------------------------
         DorkPattern::gh("Slack bot token", "xoxb- filename:.env", "SaaS", "Critical"),
-        DorkPattern::gh("Slack user token", "xoxp- extension:env", "SaaS", "Critical"),
-        DorkPattern::gh("SLACK_TOKEN env", "SLACK_TOKEN extension:env", "SaaS", "Critical"),
-        DorkPattern::gh("Stripe live key", "sk_live_ filename:.env", "SaaS", "Critical"),
-        DorkPattern::gh("Stripe test key env", "sk_test_ extension:env", "SaaS", "High"),
-        DorkPattern::gh("STRIPE_SECRET_KEY env", "STRIPE_SECRET_KEY extension:env", "SaaS", "Critical"),
-        DorkPattern::gh("SendGrid API key", "SG. extension:env OR SENDGRID_API_KEY extension:env", "SaaS", "High"),
-        DorkPattern::gh("Twilio SID env", "TWILIO_AUTH_TOKEN extension:env OR TWILIO_API_KEY extension:env", "SaaS", "High"),
-        DorkPattern::gh("PostHog API key", "POSTHOG_API_KEY filename:.env", "SaaS", "High"),
-        DorkPattern::gh("Sentry auth token", "SENTRY_AUTH_TOKEN extension:env", "SaaS", "High"),
-        DorkPattern::gh("Figma token env", "FIGMA_TOKEN filename:.env OR FIGMA_API_TOKEN filename:.env", "SaaS", "High"),
-        DorkPattern::gh("Doppler token", "DOPPLER_TOKEN filename:.env", "SaaS", "High"),
-        DorkPattern::gh("Airtable PAT", "pat extension:env OR AIRTABLE_API_KEY extension:env", "SaaS", "High"),
-        DorkPattern::gh("Notion secret", "NOTION_API_KEY extension:env OR NOTION_TOKEN extension:env", "SaaS", "Medium"),
-        DorkPattern::gh("Shopify PAT", "SHOPIFY_ACCESS_TOKEN extension:env OR shpat_ filename:.env", "SaaS", "Critical"),
-        DorkPattern::gh("Brave Search key", "BRAVE_API_KEY extension:env", "SaaS", "Medium"),
-        DorkPattern::gh("Lark app secret", "LARK_APP_SECRET extension:env", "SaaS", "High"),
-        DorkPattern::gh("Salesforce secrets env", "SALESFORCE_ACCESS_TOKEN extension:env OR SALESFORCE_CLIENT_SECRET extension:env", "SaaS", "High"),
-        DorkPattern::gh("Weights & Biases key", "WANDB_API_KEY extension:env", "SaaS", "High"),
-
+        DorkPattern::gh(
+            "Slack user token",
+            "xoxp- extension:env",
+            "SaaS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "SLACK_TOKEN env",
+            "SLACK_TOKEN extension:env",
+            "SaaS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Stripe live key",
+            "sk_live_ filename:.env",
+            "SaaS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Stripe test key env",
+            "sk_test_ extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "STRIPE_SECRET_KEY env",
+            "STRIPE_SECRET_KEY extension:env",
+            "SaaS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "SendGrid API key",
+            "SG. extension:env OR SENDGRID_API_KEY extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Twilio SID env",
+            "TWILIO_AUTH_TOKEN extension:env OR TWILIO_API_KEY extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "PostHog API key",
+            "POSTHOG_API_KEY filename:.env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Sentry auth token",
+            "SENTRY_AUTH_TOKEN extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Figma token env",
+            "FIGMA_TOKEN filename:.env OR FIGMA_API_TOKEN filename:.env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Doppler token",
+            "DOPPLER_TOKEN filename:.env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Airtable PAT",
+            "pat extension:env OR AIRTABLE_API_KEY extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Notion secret",
+            "NOTION_API_KEY extension:env OR NOTION_TOKEN extension:env",
+            "SaaS",
+            "Medium",
+        ),
+        DorkPattern::gh(
+            "Shopify PAT",
+            "SHOPIFY_ACCESS_TOKEN extension:env OR shpat_ filename:.env",
+            "SaaS",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Brave Search key",
+            "BRAVE_API_KEY extension:env",
+            "SaaS",
+            "Medium",
+        ),
+        DorkPattern::gh(
+            "Lark app secret",
+            "LARK_APP_SECRET extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Salesforce secrets env",
+            "SALESFORCE_ACCESS_TOKEN extension:env OR SALESFORCE_CLIENT_SECRET extension:env",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Weights & Biases key",
+            "WANDB_API_KEY extension:env",
+            "SaaS",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // npm / CI / registries
         // ----------------------------------------------------------------
-        DorkPattern::gh("npm token env", "npm_token extension:env OR NPM_TOKEN extension:env", "Registry", "High"),
-        DorkPattern::gh("PyPI token", "PYPI_TOKEN extension:env OR TWINE_PASSWORD extension:env", "Registry", "High"),
-        DorkPattern::gh("Docker Hub token", "DOCKER_PASSWORD extension:env OR dckr_pat_ filename:.env", "Registry", "High"),
-
+        DorkPattern::gh(
+            "npm token env",
+            "npm_token extension:env OR NPM_TOKEN extension:env",
+            "Registry",
+            "High",
+        ),
+        DorkPattern::gh(
+            "PyPI token",
+            "PYPI_TOKEN extension:env OR TWINE_PASSWORD extension:env",
+            "Registry",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Docker Hub token",
+            "DOCKER_PASSWORD extension:env OR dckr_pat_ filename:.env",
+            "Registry",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // Private keys & certificates
         // ----------------------------------------------------------------
-        DorkPattern::gh("RSA private key PEM", "BEGIN RSA PRIVATE KEY extension:pem", "Private Keys", "Critical"),
-        DorkPattern::gh("OpenSSH private key", "BEGIN OPENSSH PRIVATE KEY extension:key", "Private Keys", "Critical"),
-        DorkPattern::gh("PGP private key", "BEGIN PGP PRIVATE KEY BLOCK extension:asc", "Private Keys", "Critical"),
-
+        DorkPattern::gh(
+            "RSA private key PEM",
+            "BEGIN RSA PRIVATE KEY extension:pem",
+            "Private Keys",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "OpenSSH private key",
+            "BEGIN OPENSSH PRIVATE KEY extension:key",
+            "Private Keys",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "PGP private key",
+            "BEGIN PGP PRIVATE KEY BLOCK extension:asc",
+            "Private Keys",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // MCP config surface (massive 2026 attack surface)
         // AI agent tools commit these JSON configs with hardcoded keys
         // ----------------------------------------------------------------
-        DorkPattern::gh("MCP claude_desktop_config secrets", "mcpServers filename:claude_desktop_config.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP cursor config secrets", "mcpServers filename:mcp.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP vscode config secrets", "mcpServers path:.vscode/mcp.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP windsurf config secrets", "mcpServers path:.windsurf/mcp.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP config with hardcoded API key", "OPENAI_API_KEY filename:claude_desktop_config.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP config with GitHub token", "GITHUB_TOKEN filename:claude_desktop_config.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP config with Anthropic key", "ANTHROPIC_API_KEY filename:claude_desktop_config.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP config with DB URL", "DATABASE_URL filename:claude_desktop_config.json", "MCP", "Critical"),
-        DorkPattern::gh("MCP config any key in mcp.json", "API_KEY filename:mcp.json", "MCP", "Critical"),
-
+        DorkPattern::gh(
+            "MCP claude_desktop_config secrets",
+            "mcpServers filename:claude_desktop_config.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP cursor config secrets",
+            "mcpServers filename:mcp.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP vscode config secrets",
+            "mcpServers path:.vscode/mcp.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP windsurf config secrets",
+            "mcpServers path:.windsurf/mcp.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP config with hardcoded API key",
+            "OPENAI_API_KEY filename:claude_desktop_config.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP config with GitHub token",
+            "GITHUB_TOKEN filename:claude_desktop_config.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP config with Anthropic key",
+            "ANTHROPIC_API_KEY filename:claude_desktop_config.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP config with DB URL",
+            "DATABASE_URL filename:claude_desktop_config.json",
+            "MCP",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "MCP config any key in mcp.json",
+            "API_KEY filename:mcp.json",
+            "MCP",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // Extended file surfaces (log, bak, backup, secret, ini, conf…)
         // ----------------------------------------------------------------
-        DorkPattern::gh("API key in .log files", "API_KEY extension:log", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .bak files", "password extension:bak OR api_key extension:bak", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .backup files", "password extension:backup OR secret extension:backup", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .secret files", "api_key extension:secret OR password extension:secret", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .private files", "api_key extension:private OR secret extension:private", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .key files", "PRIVATE KEY extension:key OR api_key extension:key", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .envrc files", "export API_KEY extension:envrc OR export SECRET extension:envrc", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .prod files", "API_KEY extension:prod OR SECRET extension:prod", "Extended Surface", "High"),
-        DorkPattern::gh("Secret in .conf files", "api_key extension:conf OR password extension:conf", "Extended Surface", "Medium"),
-        DorkPattern::gh("Secret in .ini files", "api_key extension:ini OR password extension:ini", "Extended Surface", "Medium"),
-
+        DorkPattern::gh(
+            "API key in .log files",
+            "API_KEY extension:log",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .bak files",
+            "password extension:bak OR api_key extension:bak",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .backup files",
+            "password extension:backup OR secret extension:backup",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .secret files",
+            "api_key extension:secret OR password extension:secret",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .private files",
+            "api_key extension:private OR secret extension:private",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .key files",
+            "PRIVATE KEY extension:key OR api_key extension:key",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .envrc files",
+            "export API_KEY extension:envrc OR export SECRET extension:envrc",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .prod files",
+            "API_KEY extension:prod OR SECRET extension:prod",
+            "Extended Surface",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secret in .conf files",
+            "api_key extension:conf OR password extension:conf",
+            "Extended Surface",
+            "Medium",
+        ),
+        DorkPattern::gh(
+            "Secret in .ini files",
+            "api_key extension:ini OR password extension:ini",
+            "Extended Surface",
+            "Medium",
+        ),
         // ----------------------------------------------------------------
         // GitHub Actions secrets surface
         // ----------------------------------------------------------------
-        DorkPattern::gh("GH Actions hardcoded secret", "OPENAI_API_KEY path:.github/workflows", "CI/CD", "Critical"),
-        DorkPattern::gh("GH Actions AWS key", "AWS_ACCESS_KEY_ID path:.github/workflows", "CI/CD", "Critical"),
-        DorkPattern::gh("GH Actions Anthropic key", "ANTHROPIC_API_KEY path:.github/workflows", "CI/CD", "Critical"),
-        DorkPattern::gh("GH Actions token hardcoded", "GITHUB_TOKEN path:.github/workflows extension:yml", "CI/CD", "High"),
-        DorkPattern::gh("GH Actions generic secret", "API_KEY path:.github/workflows extension:yml", "CI/CD", "High"),
-
+        DorkPattern::gh(
+            "GH Actions hardcoded secret",
+            "OPENAI_API_KEY path:.github/workflows",
+            "CI/CD",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GH Actions AWS key",
+            "AWS_ACCESS_KEY_ID path:.github/workflows",
+            "CI/CD",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GH Actions Anthropic key",
+            "ANTHROPIC_API_KEY path:.github/workflows",
+            "CI/CD",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "GH Actions token hardcoded",
+            "GITHUB_TOKEN path:.github/workflows extension:yml",
+            "CI/CD",
+            "High",
+        ),
+        DorkPattern::gh(
+            "GH Actions generic secret",
+            "API_KEY path:.github/workflows extension:yml",
+            "CI/CD",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // Composite high-signal path: queries (modern GitHub search syntax)
         // Multi-extension OR chains — highest recall per query slot
         // ----------------------------------------------------------------
-        DorkPattern::gh("OpenAI key multi-surface", "sk-proj- path:*.env OR sk-proj- path:*.yaml OR sk-proj- path:*.json", "Composite", "Critical"),
-        DorkPattern::gh("Anthropic key multi-surface", "sk-ant- path:*.env OR sk-ant- path:*.yaml OR sk-ant- path:*.json", "Composite", "Critical"),
-        DorkPattern::gh("AWS key multi-surface", "AWS_ACCESS_KEY_ID path:*.env OR AWS_ACCESS_KEY_ID path:*.conf OR AWS_ACCESS_KEY_ID path:*.ini", "Composite", "Critical"),
-        DorkPattern::gh("DB URL multi-surface", "DATABASE_URL path:*.env OR DATABASE_URL path:*.conf OR DATABASE_URL path:*.ini", "Composite", "High"),
-        DorkPattern::gh("Generic secret multi-surface", "api_key path:*.log OR api_key path:*.bak OR api_key path:*.backup", "Composite", "High"),
-        DorkPattern::gh("Private key multi-surface", "BEGIN PRIVATE KEY path:*.pem OR BEGIN PRIVATE KEY path:*.key OR BEGIN PRIVATE KEY path:*.txt", "Composite", "Critical"),
-
+        DorkPattern::gh(
+            "OpenAI key multi-surface",
+            "sk-proj- path:*.env OR sk-proj- path:*.yaml OR sk-proj- path:*.json",
+            "Composite",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Anthropic key multi-surface",
+            "sk-ant- path:*.env OR sk-ant- path:*.yaml OR sk-ant- path:*.json",
+            "Composite",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "AWS key multi-surface",
+            "AWS_ACCESS_KEY_ID path:*.env OR AWS_ACCESS_KEY_ID path:*.conf OR AWS_ACCESS_KEY_ID path:*.ini",
+            "Composite",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "DB URL multi-surface",
+            "DATABASE_URL path:*.env OR DATABASE_URL path:*.conf OR DATABASE_URL path:*.ini",
+            "Composite",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Generic secret multi-surface",
+            "api_key path:*.log OR api_key path:*.bak OR api_key path:*.backup",
+            "Composite",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Private key multi-surface",
+            "BEGIN PRIVATE KEY path:*.pem OR BEGIN PRIVATE KEY path:*.key OR BEGIN PRIVATE KEY path:*.txt",
+            "Composite",
+            "Critical",
+        ),
         // ----------------------------------------------------------------
         // Shell / dotfile surface
         // ----------------------------------------------------------------
-        DorkPattern::gh(".npmrc with auth token", "_auth filename:.npmrc", "Dotfiles", "High"),
-        DorkPattern::gh(".dockercfg with auth", "auth filename:.dockercfg", "Dotfiles", "High"),
-        DorkPattern::gh(".netrc with password", "password filename:.netrc", "Dotfiles", "Critical"),
-        DorkPattern::gh(".bash_history with AWS", "aws_access_key filename:.bash_history", "Dotfiles", "Critical"),
-        DorkPattern::gh(".bash_profile with AWS", "AWS filename:.bash_profile", "Dotfiles", "Critical"),
-        DorkPattern::gh("Shell export with API key", "export API_KEY extension:sh", "Dotfiles", "High"),
-        DorkPattern::gh("Shell export with secret", "export SECRET extension:sh OR export TOKEN extension:sh", "Dotfiles", "High"),
-
+        DorkPattern::gh(
+            ".npmrc with auth token",
+            "_auth filename:.npmrc",
+            "Dotfiles",
+            "High",
+        ),
+        DorkPattern::gh(
+            ".dockercfg with auth",
+            "auth filename:.dockercfg",
+            "Dotfiles",
+            "High",
+        ),
+        DorkPattern::gh(
+            ".netrc with password",
+            "password filename:.netrc",
+            "Dotfiles",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            ".bash_history with AWS",
+            "aws_access_key filename:.bash_history",
+            "Dotfiles",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            ".bash_profile with AWS",
+            "AWS filename:.bash_profile",
+            "Dotfiles",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Shell export with API key",
+            "export API_KEY extension:sh",
+            "Dotfiles",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Shell export with secret",
+            "export SECRET extension:sh OR export TOKEN extension:sh",
+            "Dotfiles",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // Framework-specific secret files
         // ----------------------------------------------------------------
-        DorkPattern::gh("Django SECRET_KEY", "SECRET_KEY filename:settings.py", "Framework", "Critical"),
-        DorkPattern::gh("Rails SECRET_KEY_BASE", "SECRET_KEY_BASE filename:secrets.yml", "Framework", "Critical"),
-        DorkPattern::gh("Rails master.key", "filename:master.key path:config", "Framework", "Critical"),
-        DorkPattern::gh("Laravel .env APP_KEY", "APP_KEY filename:.env", "Framework", "High"),
-        DorkPattern::gh("Phoenix prod secret", "filename:prod.secret.exs", "Framework", "Critical"),
-        DorkPattern::gh("Jupyter notebook config token", "password filename:jupyter_notebook_config.json", "Framework", "High"),
-
+        DorkPattern::gh(
+            "Django SECRET_KEY",
+            "SECRET_KEY filename:settings.py",
+            "Framework",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Rails SECRET_KEY_BASE",
+            "SECRET_KEY_BASE filename:secrets.yml",
+            "Framework",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Rails master.key",
+            "filename:master.key path:config",
+            "Framework",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Laravel .env APP_KEY",
+            "APP_KEY filename:.env",
+            "Framework",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Phoenix prod secret",
+            "filename:prod.secret.exs",
+            "Framework",
+            "Critical",
+        ),
+        DorkPattern::gh(
+            "Jupyter notebook config token",
+            "password filename:jupyter_notebook_config.json",
+            "Framework",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // Slack webhook URLs (hardcoded in source)
         // ----------------------------------------------------------------
-        DorkPattern::gh("Slack webhook URL in code", "hooks.slack.com/services/ extension:js", "SaaS", "High"),
-        DorkPattern::gh("Slack webhook URL in Python", "hooks.slack.com/services/ extension:py", "SaaS", "High"),
-        DorkPattern::gh("Slack webhook URL in env", "hooks.slack.com/services/ filename:.env", "SaaS", "High"),
-
+        DorkPattern::gh(
+            "Slack webhook URL in code",
+            "hooks.slack.com/services/ extension:js",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Slack webhook URL in Python",
+            "hooks.slack.com/services/ extension:py",
+            "SaaS",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Slack webhook URL in env",
+            "hooks.slack.com/services/ filename:.env",
+            "SaaS",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // Config file surface area
         // ----------------------------------------------------------------
-        DorkPattern::gh("API key in .env files", "API filename:.env", "Config", "High"),
-        DorkPattern::gh("Secrets in docker-compose", "API_KEY filename:docker-compose.yml OR SECRET filename:docker-compose.yml", "Config", "High"),
-        DorkPattern::gh("Secrets in Terraform vars", "sensitive extension:tfvars OR API_KEY extension:tfvars", "Config", "High"),
-        DorkPattern::gh("Secrets in Kubernetes manifest", "stringData extension:yaml", "Config", "High"),
-        DorkPattern::gh("JWT secret env", "JWT_SECRET filename:.env OR SECRET_KEY_BASE extension:env", "Config", "High"),
-
+        DorkPattern::gh(
+            "API key in .env files",
+            "API filename:.env",
+            "Config",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secrets in docker-compose",
+            "API_KEY filename:docker-compose.yml OR SECRET filename:docker-compose.yml",
+            "Config",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secrets in Terraform vars",
+            "sensitive extension:tfvars OR API_KEY extension:tfvars",
+            "Config",
+            "High",
+        ),
+        DorkPattern::gh(
+            "Secrets in Kubernetes manifest",
+            "stringData extension:yaml",
+            "Config",
+            "High",
+        ),
+        DorkPattern::gh(
+            "JWT secret env",
+            "JWT_SECRET filename:.env OR SECRET_KEY_BASE extension:env",
+            "Config",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // Backup & data files
         // ----------------------------------------------------------------
-        DorkPattern::gh("Password in backup", "password extension:bak", "Backup", "Medium"),
-        DorkPattern::gh("SQL dump with credentials", "INSERT INTO users extension:sql", "Backup", "High"),
-
+        DorkPattern::gh(
+            "Password in backup",
+            "password extension:bak",
+            "Backup",
+            "Medium",
+        ),
+        DorkPattern::gh(
+            "SQL dump with credentials",
+            "INSERT INTO users extension:sql",
+            "Backup",
+            "High",
+        ),
         // ----------------------------------------------------------------
         // raw.githubusercontent.com surface
         //
@@ -552,7 +1341,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "CHATGPT_API_KEY extension:env".into(),
         "CODEX_API_KEY extension:env".into(),
         "GPT_API_KEY extension:env".into(),
-
         // ---- Anthropic ----
         "ANTHROPIC_API_KEY extension:env".into(),
         "ANTHROPIC_API_KEY extension:yaml".into(),
@@ -567,7 +1355,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "CLAUDE_API_KEY extension:env".into(),
         "CLAUDE_API_TOKEN extension:env".into(),
         "CLAUDE_CODE_API_KEY extension:env".into(),
-
         // ---- 2026 AI providers ----
         "GROQ_API_KEY extension:env".into(),
         "gsk_ filename:.env".into(),
@@ -598,7 +1385,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "fal_ filename:.env".into(),
         "ANTHROPIC_ADMIN_API_KEY extension:env".into(),
         "sk-ant-admin- filename:.env".into(),
-
         // ---- Google / Azure ----
         "GOOGLE_API_KEY filename:.env".into(),
         "GEMINI_API_KEY extension:env".into(),
@@ -606,14 +1392,12 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "AZURE_OPENAI_KEY extension:env".into(),
         "AZURE_OPENAI_API_KEY extension:yaml".into(),
         "AZURE_COGNITIVE_KEY extension:env".into(),
-
         // ---- AWS ----
         "AWS_ACCESS_KEY_ID filename:.env".into(),
         "AWS_ACCESS_KEY_ID extension:ipynb".into(),
         "AWS_SECRET_ACCESS_KEY filename:.env".into(),
         "AKIA extension:env".into(),
         "aws_access_key_id extension:yaml".into(),
-
         // ---- GitHub tokens ----
         "ghp_ filename:.env".into(),
         "github_pat_ filename:.env".into(),
@@ -621,7 +1405,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "gho_ filename:.env".into(),
         "ghs_ extension:yaml".into(),
         "GITHUB_TOKEN extension:env".into(),
-
         // ---- Cloud infra ----
         "VERCEL_TOKEN filename:.env".into(),
         "CLOUDFLARE_API_KEY extension:env".into(),
@@ -636,7 +1419,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "MAPBOX_SECRET_ACCESS_TOKEN extension:env".into(),
         "CLERK_SECRET_KEY extension:env".into(),
         "INFISICAL_TOKEN extension:env".into(),
-
         // ---- Database ----
         "DATABASE_URL extension:env".into(),
         "mongodb:// filename:.env".into(),
@@ -648,7 +1430,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "NEON_API_KEY filename:.env".into(),
         "PLANETSCALE_TOKEN filename:.env".into(),
         "SUPABASE_SERVICE_KEY extension:env".into(),
-
         // ---- SaaS & comms ----
         "xoxb- filename:.env".into(),
         "xoxp- extension:env".into(),
@@ -666,25 +1447,21 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "BRAVE_API_KEY extension:env".into(),
         "SALESFORCE_ACCESS_TOKEN extension:env".into(),
         "SALESFORCE_CLIENT_SECRET extension:env".into(),
-
         // ---- Registries ----
         "NPM_TOKEN extension:env".into(),
         "PYPI_TOKEN extension:env".into(),
         "DOCKER_PASSWORD extension:env".into(),
         "dckr_pat_ filename:.env".into(),
-
         // ---- Config file surface ----
         "API_KEY filename:docker-compose.yml".into(),
         "SECRET filename:docker-compose.yml".into(),
         "API_KEY extension:tfvars".into(),
         "JWT_SECRET filename:.env".into(),
         "SECRET_KEY_BASE extension:env".into(),
-
         // ---- Private keys ----
         "BEGIN RSA PRIVATE KEY extension:pem".into(),
         "BEGIN OPENSSH PRIVATE KEY extension:key".into(),
         "BEGIN PRIVATE KEY filename:id_rsa".into(),
-
         // ---- 2026 new AI providers ----
         "CEREBRAS_API_KEY extension:env".into(),
         "csk- filename:.env".into(),
@@ -699,7 +1476,6 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "DEEPINFRA_API_KEY extension:env".into(),
         "CEREBRAS_API_KEY extension:ipynb".into(),
         "OPENROUTER_API_KEY extension:ipynb".into(),
-
         // ---- MCP config surface ----
         "mcpServers filename:claude_desktop_config.json".into(),
         "mcpServers filename:mcp.json".into(),
@@ -708,13 +1484,11 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "GITHUB_TOKEN filename:claude_desktop_config.json".into(),
         "DATABASE_URL filename:claude_desktop_config.json".into(),
         "API_KEY filename:mcp.json".into(),
-
         // ---- GitHub Actions surface ----
         "OPENAI_API_KEY path:.github/workflows".into(),
         "AWS_ACCESS_KEY_ID path:.github/workflows".into(),
         "ANTHROPIC_API_KEY path:.github/workflows".into(),
         "API_KEY path:.github/workflows extension:yml".into(),
-
         // ---- Extended file surfaces ----
         "API_KEY extension:log".into(),
         "api_key extension:bak".into(),
@@ -724,26 +1498,22 @@ pub fn get_advanced_github_queries() -> Vec<String> {
         "api_key extension:conf".into(),
         "api_key extension:ini".into(),
         "export API_KEY extension:sh".into(),
-
         // ---- Shell / dotfile surface ----
         "_auth filename:.npmrc".into(),
         "auth filename:.dockercfg".into(),
         "password filename:.netrc".into(),
         "aws_access_key filename:.bash_history".into(),
         "AWS filename:.bash_profile".into(),
-
         // ---- Framework secret files ----
         "SECRET_KEY filename:settings.py".into(),
         "SECRET_KEY_BASE filename:secrets.yml".into(),
         "filename:master.key path:config".into(),
         "APP_KEY filename:.env".into(),
         "filename:prod.secret.exs".into(),
-
         // ---- Slack webhooks ----
         "hooks.slack.com/services/ extension:js".into(),
         "hooks.slack.com/services/ extension:py".into(),
         "hooks.slack.com/services/ filename:.env".into(),
-
         // ---- Composite path: multi-surface ----
         "sk-proj- path:*.yaml".into(),
         "sk-ant- path:*.yaml".into(),
@@ -815,14 +1585,33 @@ mod tests {
         let combined = all_queries.join("\n");
 
         for provider in &[
-            "TAVILY", "ELEVENLABS", "LARK", "SHOPIFY", "DATABRICKS",
-            "NEON", "SENTRY", "POSTHOG", "DEEPSEEK",
-            "WANDB", "STABILITY", "FAL", "TAILSCALE", "MAPBOX",
-            "CLERK", "SALESFORCE", "NETLIFY",
+            "TAVILY",
+            "ELEVENLABS",
+            "LARK",
+            "SHOPIFY",
+            "DATABRICKS",
+            "NEON",
+            "SENTRY",
+            "POSTHOG",
+            "DEEPSEEK",
+            "WANDB",
+            "STABILITY",
+            "FAL",
+            "TAILSCALE",
+            "MAPBOX",
+            "CLERK",
+            "SALESFORCE",
+            "NETLIFY",
             // 2026 additions
-            "CEREBRAS", "OPENROUTER", "NVIDIA", "FIREWORKS",
-            "SILICONFLOW", "MOONSHOT", "DEEPINFRA",
-            "mcpServers", "hooks.slack.com",
+            "CEREBRAS",
+            "OPENROUTER",
+            "NVIDIA",
+            "FIREWORKS",
+            "SILICONFLOW",
+            "MOONSHOT",
+            "DEEPINFRA",
+            "mcpServers",
+            "hooks.slack.com",
         ] {
             assert!(
                 combined.contains(provider),

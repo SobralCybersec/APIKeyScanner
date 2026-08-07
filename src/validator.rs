@@ -570,16 +570,16 @@ impl KeyValidator {
     /// Validate a Slack token (`xoxb-*` / `xoxp-*` / `xoxa-*`).
     pub async fn validate_slack(&self, key: &str) -> KeyValidationResult {
         let start = std::time::Instant::now();
-        let valid_prefix = key.starts_with("xoxb-")
-            || key.starts_with("xoxp-")
-            || key.starts_with("xoxa-");
+        let valid_prefix =
+            key.starts_with("xoxb-") || key.starts_with("xoxp-") || key.starts_with("xoxa-");
         if !valid_prefix {
             return KeyValidationResult {
                 provider: "Slack".to_string(),
                 key_type: "slack".to_string(),
                 is_valid: false,
                 status_code: None,
-                message: "Invalid format (must start with 'xoxb-', 'xoxp-', or 'xoxa-')".to_string(),
+                message: "Invalid format (must start with 'xoxb-', 'xoxp-', or 'xoxa-')"
+                    .to_string(),
                 response_time_ms: start.elapsed().as_millis() as u64,
             };
         }
@@ -594,8 +594,7 @@ impl KeyValidator {
                 let status = response.status().as_u16();
                 // Slack always returns HTTP 200; validity is in the JSON `ok` field.
                 let body = response.text().await.unwrap_or_default();
-                let is_valid = status == 200
-                    && body.contains("\"ok\":true");
+                let is_valid = status == 200 && body.contains("\"ok\":true");
                 KeyValidationResult {
                     provider: "Slack".to_string(),
                     key_type: "slack".to_string(),
@@ -896,10 +895,7 @@ impl KeyValidator {
     pub async fn validate_vercel(&self, token: &str) -> KeyValidationResult {
         let start = std::time::Instant::now();
 
-        if !token.starts_with("vcp_")
-            && !token.starts_with("vci_")
-            && !token.starts_with("vck_")
-        {
+        if !token.starts_with("vcp_") && !token.starts_with("vci_") && !token.starts_with("vck_") {
             return KeyValidationResult {
                 provider: "Vercel".to_string(),
                 key_type: "vercel".to_string(),
@@ -1104,9 +1100,9 @@ impl KeyValidator {
 pub async fn test_findings(
     findings: &[crate::storage::PrivateFinding],
 ) -> Result<Vec<KeyValidationResult>> {
+    use futures::stream::{self, StreamExt};
     use std::sync::Arc;
     use tokio::sync::Semaphore;
-    use futures::stream::{self, StreamExt};
 
     // 5 concurrent validation requests; stays well within typical rate limits.
     let validator = Arc::new(KeyValidator::new()?);
@@ -1180,7 +1176,11 @@ async fn save_validation_results(
         "Provider,Key Type,Valid,Status Code,Message,Response Time (ms),Repository,Key Preview,Full Key\n",
     );
     for (result, finding) in results.iter().zip(findings.iter()) {
-        let full_key = if result.is_valid { finding.full_key.as_str() } else { "" };
+        let full_key = if result.is_valid {
+            finding.full_key.as_str()
+        } else {
+            ""
+        };
         csv.push_str(&format!(
             "\"{}\",\"{}\",{},{},\"{}\",{},\"{}\",\"{}\",\"{}\"\n",
             result.provider,
@@ -1336,16 +1336,14 @@ fn display_validation_results_internal(
             None => println!("  └─ Response time: {}ms", result.response_time_ms),
         }
 
-        if result.is_valid {
-            if let Some(finding) = findings.and_then(|items| items.get(idx)) {
-                println!("  └─ Full key: {}", finding.full_key);
-            }
+        if result.is_valid
+            && let Some(finding) = findings.and_then(|items| items.get(idx))
+        {
+            println!("  └─ Full key: {}", finding.full_key);
         }
         println!();
 
-        let entry = by_provider
-            .entry(result.provider.clone())
-            .or_insert((0, 0));
+        let entry = by_provider.entry(result.provider.clone()).or_insert((0, 0));
         if result.is_valid {
             active_count += 1;
             entry.0 += 1;
