@@ -1,4 +1,6 @@
-use crate::dorks::{DorkPattern, DorkSource, get_github_dorks, get_raw_github_dorks};
+use crate::dorks::{
+    DorkPattern, DorkSource, get_github_dorks, get_raw_github_dorks, get_web_dorks,
+};
 use crate::storage::{PrivateFinding, PublicFinding, SecureStorage};
 use crate::validator;
 use anyhow::Result;
@@ -272,6 +274,7 @@ async fn show_statistics(storage: &SecureStorage) -> Result<()> {
 pub fn show_dork_patterns() {
     let dorks = get_github_dorks();
     let raw_dorks = get_raw_github_dorks();
+    let web_dorks = get_web_dorks();
 
     println!("\nGitHub Code-Search Dork Patterns\n");
 
@@ -301,6 +304,16 @@ pub fn show_dork_patterns() {
         raw_dorks.len()
     );
     for dork in &raw_dorks {
+        println!("   • {} [{}]", dork.name, dork.risk_level);
+    }
+    println!(
+        "\nExternal Web/GitLab/Gist dorks — {} patterns\n",
+        web_dorks.len()
+    );
+    for dork in web_dorks
+        .iter()
+        .filter(|dork| !raw_dorks.iter().any(|raw| raw.query == dork.query))
+    {
         println!("   • {} [{}]", dork.name, dork.risk_level);
     }
     println!();

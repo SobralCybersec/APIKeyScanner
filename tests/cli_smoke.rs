@@ -1,10 +1,22 @@
 use std::process::Command;
 
 fn scanner(args: &[&str]) -> std::process::Output {
-    Command::new(env!("CARGO_BIN_EXE_api-key-scanner"))
+    let cwd = std::env::temp_dir().join(format!(
+        "api-key-scanner-cli-smoke-{}-{}",
+        std::process::id(),
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("system clock should be after epoch")
+            .as_nanos()
+    ));
+    std::fs::create_dir_all(&cwd).expect("test cwd should be created");
+    let output = Command::new(env!("CARGO_BIN_EXE_api-key-scanner"))
         .args(args)
+        .current_dir(&cwd)
         .output()
-        .expect("scanner binary should execute")
+        .expect("scanner binary should execute");
+    std::fs::remove_dir_all(cwd).expect("test cwd should be removed");
+    output
 }
 
 #[test]

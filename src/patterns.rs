@@ -178,6 +178,10 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"(?:HUGGINGFACE_API_KEY|HF_API_KEY|HF_TOKEN)\s*[=:]\s*['"`]?(hf_[A-Za-z0-9]{20,}|[A-Za-z0-9_-]{20,})"#,
             "hf-env"
         ),
+        pat!(
+            r#"hf_(?:jwt|oauth)_[A-Za-z0-9_-]{20,}"#,
+            "huggingface-session"
+        ),
         // ----------------------------------------------------------------
         // Replicate  — r8_ prefix
         // ----------------------------------------------------------------
@@ -235,6 +239,7 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
         // ----------------------------------------------------------------
         // AKIA + 16 uppercase alphanumeric
         pat!(r#"AKIA[0-9A-Z]{16}"#, "aws-access-key"),
+        pat!(r#"ASIA[0-9A-Z]{16}"#, "aws-session-key"),
         // Secret must follow the access key (40-char base64-like)
         pat!(
             r#"AWS_SECRET_ACCESS_KEY\s*[=:]\s*['"`]?([a-zA-Z0-9/+=]{40})"#,
@@ -275,6 +280,7 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"sb_publishable_[a-zA-Z0-9_-]{20,}"#,
             "supabase-publishable"
         ),
+        pat!(r#"sb_secret_[a-zA-Z0-9_-]{20,}"#, "supabase-secret"),
         // JWT tokens (service role / anon keys) — anchored base64url segments
         pat!(
             r#"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\.[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}"#,
@@ -304,7 +310,8 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             "cloudflare-wrangler"
         ),
         // Workers AI gateway token (cfut_ prefix, 2026)
-        pat!(r#"cfut_[a-zA-Z0-9_-]{32,}"#, "cloudflare-workers-ai"),
+        pat!(r#"cfut_[a-zA-Z0-9_-]{40,}"#, "cloudflare-workers-ai"),
+        pat!(r#"(?:cfk|cfat)_[a-zA-Z0-9_-]{40,}"#, "cloudflare-modern"),
         // ----------------------------------------------------------------
         // Databricks
         // ----------------------------------------------------------------
@@ -419,6 +426,10 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
         // ----------------------------------------------------------------
         pat!(r#"sk\.eyJ1[a-zA-Z0-9_-]{40,}"#, "mapbox"),
         pat!(
+            r#"(?:pk|tk)\.[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}"#,
+            "mapbox-token"
+        ),
+        pat!(
             r#"MAPBOX_(?:SECRET_)?(?:ACCESS_)?TOKEN\s*[=:]\s*['"`]?(sk\.[a-zA-Z0-9_-]{20,})"#,
             "mapbox-env"
         ),
@@ -494,12 +505,17 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
             r#"xoxa-[0-9]{10,13}-[0-9]{10,13}-[a-zA-Z0-9]{24}"#,
             "slack-app"
         ),
+        pat!(r#"xapp-[a-zA-Z0-9-]{20,}"#, "slack-config"),
         // ----------------------------------------------------------------
         // Stripe
         // ----------------------------------------------------------------
         pat!(r#"sk_live_[a-zA-Z0-9]{24,}"#, "stripe-live"),
         pat!(r#"sk_test_[a-zA-Z0-9]{24,}"#, "stripe-test"),
         pat!(r#"rk_live_[a-zA-Z0-9]{24,}"#, "stripe-restricted-live"),
+        pat!(
+            r#"(?:pk|rk)_(?:live|test)_[a-zA-Z0-9]{24,}"#,
+            "stripe-public-restricted"
+        ),
         // ----------------------------------------------------------------
         // SendGrid
         // ----------------------------------------------------------------
@@ -533,6 +549,7 @@ pub static API_KEY_PATTERNS: LazyLock<PatternList> = LazyLock::new(|| {
         // ----------------------------------------------------------------
         pat!(r#"npm_[a-zA-Z0-9]{36}"#, "npm"),
         pat!(r#"pypi-AgEIcHlwaS5vcmc[a-zA-Z0-9_-]{40,}"#, "pypi"),
+        pat!(r#"pypi-[A-Za-z0-9_-]{85,}"#, "pypi-modern"),
         pat!(r#"dckr_pat_[a-zA-Z0-9_-]{40}"#, "docker"),
         // ----------------------------------------------------------------
         // Airtable  — pat + 14 alphanum + . + 64 hex (push-protected March 2026)
@@ -743,6 +760,50 @@ mod tests {
                 API_KEY_PATTERNS.iter().any(|(p, _)| p.is_match(&key)),
                 "no pattern matched Shopify token with prefix {}",
                 prefix
+            );
+        }
+    }
+
+    #[test]
+    fn modern_provider_prefixes() {
+        let cases = [
+            ("supabase-secret", "sb_secret_abcdefghijklmnopqrstuvwxyz"),
+            (
+                "cloudflare-modern",
+                "cfk_abcdefghijklmnopqrstuvwxyz12345678901234567890",
+            ),
+            (
+                "mapbox-token",
+                "pk.eyJabcdefghijklmnopqrstuvwxyz.signatureabcdefghijklmnop",
+            ),
+            (
+                "stripe-public-restricted",
+                "pk_test_abcdefghijklmnopqrstuvwxyz123456",
+            ),
+            ("slack-config", "xapp-1-abcdefghijklmnopqrstuvwxyz"),
+            ("pypi-modern", &format!("pypi-{}", "a".repeat(85))),
+            ("aws-session-key", "ASIA1234567890ABCDEF"),
+            ("huggingface-session", "hf_oauth_abcdefghijklmnopqrstuvwxyz"),
+        ];
+
+        for (label, value) in cases {
+            assert!(
+                find_pattern(label).is_match(value),
+                "{} did not match",
+                label
+            );
+        }
+    }
+
+    #[test]
+    fn modern_provider_prefixes_reject_short_values() {
+        for value in ["cfk_short", "pypi-short", "r8_123", "sk_live_short"] {
+            assert!(
+                !API_KEY_PATTERNS
+                    .iter()
+                    .any(|(pattern, _)| pattern.is_match(value)),
+                "short value unexpectedly matched: {}",
+                value
             );
         }
     }

@@ -40,7 +40,8 @@ High-performance Rust-based API key scanner with 70+ detection patterns, concurr
 * **Concurrent GitHub Scanning**: Multi-threaded repository scanning with request budgeting, concurrency limits, and time-slotted query rotation
 * **Live Validation**: Real-time API key validation against selected provider endpoints with optional saved-key testing
 * **False Positive Filtering**: Placeholder exclusion, entropy analysis, context-aware matching, UUID screening, and minimum-length checks
-* **Google Dork Integration**: Pre-configured search queries for GitHub-focused secret hunting patterns
+* **Web Dork Integration**: API-backed Google, Brave, Bing, and GitLab searches covering GitHub raw files, Gists, GitLab, Sourcegraph, Bitbucket, paste sites, npm, Docker Hub, and domain-scoped queries
+* **Passive Subdomain Discovery**: `crt.sh` certificate-transparency lookup with wildcard stripping and deduplication
 * **Interactive Mode**: Step-by-step launcher and TUI flow for token input, scan mode, validation, and result review
 * **Public/Private Separation**: Safe findings go to `data/latest.json`; full keys go to `private_keys/full_keys.json`
 * **Workflow Verification**: CI can test and build without true credentials; live scans only run when the dedicated secret is present
@@ -129,6 +130,12 @@ cargo run -- --interactive
 
 # Show configured dork/query patterns
 cargo run -- --show-dorks
+
+# Run API-backed web dorks (set EXA_API_KEY, BRAVE_API_KEY, Google CSE, Bing, or GITLAB_TOKEN)
+cargo run --release -- --web-search --no-tui
+
+# Discover certificate-transparency subdomains and run domain-scoped dorks
+cargo run --release -- --web-search --discover-subdomains --domain example.com --no-tui
 
 # View saved findings
 cargo run -- --view

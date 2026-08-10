@@ -7,6 +7,7 @@ mod patterns;
 mod storage;
 mod tui;
 mod validator;
+mod web_search;
 
 use anyhow::Result;
 use chrono::Utc;
@@ -30,6 +31,7 @@ use storage::{PrivateFinding, PublicFinding, SecureStorage};
 use tokio::fs;
 use tokio::sync::Semaphore;
 use tracing::{error, info, warn};
+use web_search::SearchHit;
 
 #[cfg(test)]
 mod tests {
@@ -66,6 +68,15 @@ mod tests {
             findings[0].full_key,
             "sk-proj-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRST"
         );
+    }
+
+    #[test]
+    fn request_reservation_stops_at_budget() {
+        let counter = AtomicUsize::new(0);
+        assert!(try_reserve_request(&counter, 2));
+        assert!(try_reserve_request(&counter, 2));
+        assert!(!try_reserve_request(&counter, 2));
+        assert_eq!(counter.load(Ordering::Relaxed), 2);
     }
 }
 
@@ -151,6 +162,18 @@ struct Cli {
 
     #[arg(long)]
     quick: bool,
+
+    /// Run API-backed web dorks (Exa, Google CSE, Brave, Bing, and/or GitLab).
+    #[arg(long)]
+    web_search: bool,
+
+    /// Discover passive certificate-transparency subdomains with crt.sh.
+    #[arg(long)]
+    discover_subdomains: bool,
+
+    /// Root domain used by --discover-subdomains and domain-scoped web dorks.
+    #[arg(long)]
+    domain: Option<String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -333,11 +356,15 @@ fn extract_docx_text(bytes: &[u8]) -> String {
         "word/footer2.xml",
     ];
     parts.iter().fold(String::new(), |mut out, &name| {
-        let Ok(mut file) = archive.by_name(name) else {
+        let Ok(file) = archive.by_name(name) else {
             return out;
         };
         let mut xml = String::new();
-        if file.read_to_string(&mut xml).is_ok() {
+        if file
+            .take(MAX_DOCX_XML_BYTES)
+            .read_to_string(&mut xml)
+            .is_ok()
+        {
             out.push_str(&strip_xml_tags(&xml));
             out.push('\n');
         }
@@ -389,6 +416,7 @@ fn extract_and_scan_tarball<B: AsRef<[u8]>>(
 
     // Collect all scannable file contents first so rayon can parallelise them.
     let mut files: Vec<(String, String)> = Vec::new();
+    let mut scanned_bytes = 0usize;
 
     for entry in archive.entries()? {
         let mut entry = entry?;
@@ -408,6 +436,11 @@ fn extract_and_scan_tarball<B: AsRef<[u8]>>(
         if entry.read_to_end(&mut raw).is_err() {
             continue;
         }
+
+        if scanned_bytes.saturating_add(raw.len()) > MAX_ARCHIVE_SCAN_BYTES {
+            break;
+        }
+        scanned_bytes += raw.len();
 
         // GPU/SIMD pre-filter: skip files with no keyword hits at all.
         if !filter.has_any_keyword(&raw) {
@@ -521,6 +554,27 @@ fn full_scan_queries() -> Vec<String> {
 /// The current latest GitHub REST API version (released 2026-03-10).
 /// See: <https://github.blog/changelog/2026-03-12-rest-api-version-2026-03-10-is-now-available/>
 const GITHUB_API_VERSION: &str = "2026-03-10";
+const MAX_TARBALL_BYTES: usize = 50 * 1024 * 1024;
+const MAX_ARCHIVE_SCAN_BYTES: usize = 16 * 1024 * 1024;
+const MAX_DOCX_XML_BYTES: u64 = 4 * 1024 * 1024;
+
+fn try_reserve_request(counter: &AtomicUsize, max_requests: usize) -> bool {
+    let mut current = counter.load(Ordering::Relaxed);
+    loop {
+        if current >= max_requests {
+            return false;
+        }
+        match counter.compare_exchange_weak(
+            current,
+            current + 1,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        ) {
+            Ok(_) => return true,
+            Err(observed) => current = observed,
+        }
+    }
+}
 
 struct Scanner {
     client: reqwest::Client,
@@ -629,16 +683,27 @@ impl Scanner {
         true
     }
 
+    #[inline]
+    fn reserve_request(&self) -> bool {
+        if self.stop_flag.load(Ordering::Relaxed) || !self.within_time_budget() {
+            return false;
+        }
+        try_reserve_request(&self.requests_made, self.max_requests)
+    }
+
+    #[inline]
+    fn query_concurrency(&self) -> usize {
+        // GitHub recommends queued code-search requests. Two lowers latency
+        // without multiplying the existing repository worker pool.
+        self.concurrency.clamp(1, 2)
+    }
+
     fn increment_repos_scanned(&self) {
         self.repos_scanned_total.fetch_add(1, Ordering::Relaxed);
     }
 
     fn repos_scanned_so_far(&self) -> usize {
         self.repos_scanned_total.load(Ordering::Relaxed)
-    }
-
-    fn increment_requests(&self) {
-        self.requests_made.fetch_add(1, Ordering::Relaxed);
     }
 
     fn requests_so_far(&self) -> usize {
@@ -662,6 +727,10 @@ impl Scanner {
                 break;
             }
 
+            if !self.reserve_request() {
+                break;
+            }
+
             let response = tokio::time::timeout(
                 Duration::from_secs(30),
                 self.client
@@ -680,8 +749,6 @@ impl Scanner {
             )
             .await
             .map_err(|_| anyhow::anyhow!("GitHub search timed out for query: {}", query))??;
-
-            self.increment_requests();
 
             let status = response.status();
 
@@ -765,6 +832,9 @@ impl Scanner {
         if !self.can_continue() {
             return Ok(vec![]);
         }
+        if !self.reserve_request() {
+            return Ok(vec![]);
+        }
         self.increment_repos_scanned();
 
         let url = format!("https://api.github.com/repos/{}/tarball", repo_name);
@@ -781,13 +851,27 @@ impl Scanner {
             anyhow::anyhow!("Tarball download timed out after 60 s for {}", repo_name)
         })??;
 
-        self.increment_requests();
-
         if !response.status().is_success() {
             return Ok(vec![]);
         }
 
-        let bytes = response.bytes().await?;
+        if response
+            .content_length()
+            .is_some_and(|size| size > MAX_TARBALL_BYTES as u64)
+        {
+            warn!("Skipping oversized tarball for {}", repo_name);
+            return Ok(vec![]);
+        }
+
+        let mut response = response;
+        let mut bytes = Vec::new();
+        while let Some(chunk) = response.chunk().await? {
+            if bytes.len().saturating_add(chunk.len()) > MAX_TARBALL_BYTES {
+                warn!("Skipping oversized tarball for {}", repo_name);
+                return Ok(vec![]);
+            }
+            bytes.extend_from_slice(&chunk);
+        }
         let repo_name = repo_name.to_string();
         let query_label = query_label.to_string();
         let filter = Arc::clone(&self.gpu_filter);
@@ -824,17 +908,31 @@ impl Scanner {
         }
 
         let mut all_findings: Vec<PrivateFinding> = Vec::new();
-        let mut query_counter = 0usize;
         // Track which N-repo boundary we last validated at.
         let mut last_checkpoint_repos = 0usize;
 
         'outer: for pass in 0..self.query_loops {
-            for query in &queries {
+            let query_results: Vec<_> = stream::iter(queries.iter().cloned().enumerate())
+                .map(|(query_index, query)| {
+                    let scanner = self.clone();
+                    async move {
+                        scanner
+                            .search_code(&query)
+                            .await
+                            .map(|results| (query_index, query, results))
+                    }
+                })
+                .buffered(self.query_concurrency())
+                .collect()
+                .await;
+
+            for query_result in query_results {
                 if !self.can_continue() {
                     break 'outer;
                 }
 
-                query_counter += 1;
+                let (query_index, query, results) = query_result?;
+                let query_counter = pass * queries.len() + query_index + 1;
 
                 if let Some(ref app) = tui_app {
                     let mut app = app.lock().await;
@@ -850,8 +948,6 @@ impl Scanner {
                 }
 
                 info!("Query pass {}/{}: {}", pass + 1, self.query_loops, query);
-
-                let results = self.search_code(query).await?;
 
                 let repo_count = results.len();
                 if let Some(ref app) = tui_app {
@@ -1302,6 +1398,109 @@ async fn persist_and_report(findings: &[PrivateFinding]) -> Result<()> {
     Ok(())
 }
 
+/// Scan search-result snippets without downloading arbitrary result pages.
+/// GitLab returns code excerpts directly; Google/Brave/Bing may expose a
+/// credential in their indexed snippet. Result URLs remain provenance only.
+fn scan_web_hits(hits: &[SearchHit]) -> Vec<PrivateFinding> {
+    let mut findings = Vec::new();
+
+    for hit in hits {
+        let content = format!("{}\n{}", hit.title, hit.snippet);
+        let discovered_at = Utc::now().to_rfc3339();
+        let mut seen_keys = HashSet::new();
+
+        for (line_num, line) in content.lines().enumerate() {
+            for (pattern, label) in &*API_KEY_PATTERNS {
+                for cap in pattern.captures_iter(line) {
+                    let Some(key_str) = extract_secret_match(&cap) else {
+                        continue;
+                    };
+                    if FalsePositiveFilter::is_false_positive(key_str, line, label)
+                        || !seen_keys.insert(key_str.to_owned())
+                    {
+                        continue;
+                    }
+
+                    let show = 12.min(key_str.len()).max(8.min(key_str.len()));
+                    findings.push(PrivateFinding {
+                        repository: format!("{} web search", hit.provider),
+                        file_path: format!("search-result:{}", hit.query),
+                        file_url: hit.url.clone(),
+                        commit_sha: None,
+                        discovered_at: discovered_at.clone(),
+                        key_type: format!("web-{}-{}", hit.provider, label),
+                        full_key: key_str.to_owned(),
+                        key_preview: format!("{}***", &key_str[..show]),
+                        line_number: Some(line_num + 1),
+                        entropy: Some(calculate_entropy(key_str)),
+                    });
+                }
+            }
+        }
+    }
+
+    findings
+}
+
+fn domain_web_queries(domain: &str) -> Vec<String> {
+    [
+        format!("site:{domain} (\"API_KEY\" OR \"SECRET_KEY\" OR \"AWS_ACCESS_KEY_ID\")"),
+        format!("site:{domain} (\"OPENAI_API_KEY\" OR \"GITHUB_TOKEN\" OR \"DATABASE_URL\")"),
+        format!("site:{domain} (filetype:env OR filetype:yml OR filetype:yaml)"),
+    ]
+    .to_vec()
+}
+
+async fn run_web_discovery(cli: &Cli) -> Result<()> {
+    let client = reqwest::Client::builder()
+        .user_agent("APIKeyScanner-WebDiscovery/1.0")
+        .timeout(Duration::from_secs(30))
+        .build()?;
+
+    let mut domain_queries = Vec::new();
+    if let Some(domain) = cli.domain.as_deref() {
+        if cli.discover_subdomains {
+            let subdomains = web_search::discover_subdomains(&client, domain).await?;
+            info!("crt.sh discovered {} hostname(s)", subdomains.len());
+            for host in &subdomains {
+                println!("subdomain: {}", host);
+            }
+            domain_queries = domain_web_queries(domain);
+            for host in subdomains.iter().take(50) {
+                domain_queries.extend(domain_web_queries(host));
+            }
+        } else {
+            domain_queries = domain_web_queries(domain);
+        }
+    }
+
+    if !cli.web_search {
+        return Ok(());
+    }
+
+    let config = web_search::WebSearchConfig::from_env();
+    info!("web-search backends: {:?}", config.backend_names());
+    let mut queries: Vec<String> = dorks::get_web_dorks()
+        .into_iter()
+        .map(|dork| dork.query)
+        .collect();
+    queries.extend(domain_queries);
+    queries.sort();
+    queries.dedup();
+
+    let hits = web_search::search_dorks(&client, &queries, &config).await?;
+    let findings = scan_web_hits(&hits);
+    info!(
+        "web discovery completed: {} result(s), {} finding(s)",
+        hits.len(),
+        findings.len()
+    );
+    if !findings.is_empty() {
+        persist_and_report(&findings).await?;
+    }
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 // Interactive launcher
 // ---------------------------------------------------------------------------
@@ -1455,7 +1654,10 @@ async fn main() -> Result<()> {
         || cli.show_dorks
         || cli.test_keys
         || cli.no_tui
-        || cli.quick;
+        || cli.quick
+        || cli.web_search
+        || cli.discover_subdomains
+        || cli.domain.is_some();
 
     if !has_explicit_args {
         return run_interactive_launcher(Arc::clone(&gpu_filter)).await;
@@ -1496,6 +1698,10 @@ async fn main() -> Result<()> {
             }
         }
         return Ok(());
+    }
+
+    if cli.web_search || cli.discover_subdomains {
+        return run_web_discovery(&cli).await;
     }
 
     // ---- Scan sub-commands ----

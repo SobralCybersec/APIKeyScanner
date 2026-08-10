@@ -35,9 +35,11 @@ use serde::{Deserialize, Serialize};
 pub enum DorkSource {
     /// Standard GitHub code-search API query.
     GithubCodeSearch,
-    /// Google/Bing dork targeting `raw.githubusercontent.com`.
-    /// Use a web-search tool rather than the GitHub API for these.
+    /// Google/Bing/Brave dork for indexed public web content.
+    /// Use a web-search backend rather than the GitHub API for these.
     RawGitHubContent,
+    /// Web-search dork targeting a non-GitHub public surface.
+    WebSearch,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -68,6 +70,16 @@ impl DorkPattern {
             category: category.into(),
             risk_level: risk.into(),
             source: DorkSource::RawGitHubContent,
+        }
+    }
+
+    fn web(name: &str, query: &str, category: &str, risk: &str) -> Self {
+        Self {
+            name: name.into(),
+            query: query.into(),
+            category: category.into(),
+            risk_level: risk.into(),
+            source: DorkSource::WebSearch,
         }
     }
 }
@@ -1131,7 +1143,7 @@ pub fn get_github_dorks() -> Vec<DorkPattern> {
         // For broad Google searches (not scoped to raw.githubusercontent.com)
         // `filetype:env` DOES work and is included as separate entries below.
         // ----------------------------------------------------------------
-        DorkPattern::raw(
+        DorkPattern::web(
             "Raw .env files with api_key",
             r#"site:raw.githubusercontent.com inurl:".env" intext:"api_key" -intext:"sample" -intext:"test""#,
             "Raw GitHub",
@@ -1155,19 +1167,19 @@ pub fn get_github_dorks() -> Vec<DorkPattern> {
             "Raw GitHub",
             "Critical",
         ),
-        DorkPattern::raw(
+        DorkPattern::web(
             "Raw YAML with secrets",
             r#"site:raw.githubusercontent.com (inurl:".yaml" OR inurl:".yml") (intext:"api_key" OR intext:"secret_key") -intext:"example""#,
             "Raw GitHub",
             "High",
         ),
-        DorkPattern::raw(
+        DorkPattern::web(
             "Raw notebooks with API keys",
             r#"site:raw.githubusercontent.com inurl:".ipynb" (intext:"OPENAI_API_KEY" OR intext:"sk-")"#,
             "Raw GitHub",
             "Critical",
         ),
-        DorkPattern::raw(
+        DorkPattern::web(
             "Raw docker-compose with secrets",
             r#"site:raw.githubusercontent.com inurl:"docker-compose" intext:"API_KEY""#,
             "Raw GitHub",
@@ -1534,6 +1546,217 @@ pub fn get_raw_github_dorks() -> Vec<DorkPattern> {
         .collect()
 }
 
+/// Dorks for search-engine and hosted-code backends.
+///
+/// These queries are intentionally routed through API-backed web search
+/// providers instead of scraping Google/Bing result pages. Hosted-code,
+/// build-log, notebook, container, IaC, registry, subdomain, and config-file
+/// surfaces are covered here.
+pub fn get_web_dorks() -> Vec<DorkPattern> {
+    let mut dorks = get_raw_github_dorks();
+    dorks.extend([
+        DorkPattern::web(
+            "Public GitHub Gists with API keys",
+            r#"site:gist.github.com ("OPENAI_API_KEY" OR "AWS_SECRET_ACCESS_KEY" OR "ghp_" OR "sk-proj-") -"example" -"sample""#,
+            "GitHub Gists",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "GitLab public code with secrets",
+            r#"site:gitlab.com ("API_KEY" OR "SECRET_KEY" OR "AWS_ACCESS_KEY_ID" OR "sk-live_") filetype:env"#,
+            "GitLab",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Sourcegraph public code with secrets",
+            r#"site:sourcegraph.com ("OPENAI_API_KEY" OR "GITHUB_TOKEN" OR "DATABASE_URL")"#,
+            "Sourcegraph",
+            "High",
+        ),
+        DorkPattern::web(
+            "Bitbucket public files with secrets",
+            r#"site:bitbucket.org ("API_KEY" OR "AWS_SECRET_ACCESS_KEY" OR "PRIVATE_KEY")"#,
+            "Bitbucket",
+            "High",
+        ),
+        DorkPattern::web(
+            "Paste sites with provider keys",
+            r#"(site:pastebin.com OR site:paste.ee) ("OPENAI_API_KEY" OR "AWS_ACCESS_KEY_ID" OR "sk-proj-")"#,
+            "Paste Sites",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Public npm metadata with tokens",
+            r#"site:npmjs.com ("NPM_TOKEN" OR "_authToken" OR "API_KEY")"#,
+            "Package Registries",
+            "High",
+        ),
+        DorkPattern::web(
+            "Public Docker Hub metadata with credentials",
+            r#"site:hub.docker.com ("DOCKER_PASSWORD" OR "dckr_pat_")"#,
+            "Container Registries",
+            "High",
+        ),
+        DorkPattern::web(
+            "GitHub public environment files with secrets",
+            r#"site:github.com inurl:blob (filename:.env OR filename:.env.production OR filename:.env.local) ("API_KEY" OR "SECRET_KEY" OR "DATABASE_URL") -example -sample -fixture -lock"#,
+            "GitHub",
+            "High",
+        ),
+        DorkPattern::web(
+            "GitHub Actions logs with exposed variables",
+            r###"site:github.com (inurl:actions OR inurl:workflow) ("Run " OR "##[group]") ("AWS_SECRET_ACCESS_KEY" OR "GITHUB_TOKEN" OR "NPM_TOKEN") -example -sample"###,
+            "CI Logs",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "GitHub commits containing provider tokens",
+            r#"site:github.com inurl:commit ("sk-proj-" OR "ghp_" OR "xoxb-") -example -sample -fixture"#,
+            "GitHub",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "GitLab repository files with secrets",
+            r#"site:gitlab.com (inurl:/-/blob/ OR inurl:/-/raw/) ("AWS_ACCESS_KEY_ID" OR "PRIVATE_KEY" OR "DATABASE_URL") -example -sample -fixture -lock"#,
+            "GitLab",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "GitLab CI job logs with tokens",
+            r#"site:gitlab.com ("Job succeeded" OR "Running with gitlab-runner" OR "CI_JOB_TOKEN") ("SECRET_KEY" OR "ACCESS_TOKEN" OR "DEPLOY_TOKEN") -example -sample"#,
+            "CI Logs",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Sourcegraph repository search with provider keys",
+            r#"site:sourcegraph.com ("repo:" OR "file:") ("OPENAI_API_KEY" OR "AWS_SECRET_ACCESS_KEY" OR "PRIVATE_KEY") -example -sample -fixtures -lock"#,
+            "Sourcegraph",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Sourcegraph notebook search with credentials",
+            r#"site:sourcegraph.com ("file:.ipynb" OR "file:*.ipynb") ("api_key" OR "access_token" OR "password") -example -sample"#,
+            "Notebooks",
+            "High",
+        ),
+        DorkPattern::web(
+            "CircleCI build logs with secrets",
+            r#"site:circleci.com (inurl:job OR inurl:build) ("AWS_ACCESS_KEY_ID" OR "NPM_TOKEN" OR "DOCKER_PASSWORD") -example -sample"#,
+            "CI Logs",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Azure DevOps build logs with credentials",
+            r###"site:dev.azure.com ("##[section]" OR "Finishing: Build") ("SYSTEM_ACCESSTOKEN" OR "AZURE_CLIENT_SECRET" OR "API_KEY") -example -sample"###,
+            "CI Logs",
+            "High",
+        ),
+        DorkPattern::web(
+            "Jupyter notebooks with embedded API keys",
+            r#"(site:github.com OR site:gitlab.com) (filetype:ipynb OR inurl:.ipynb) ("OPENAI_API_KEY" OR "GOOGLE_API_KEY" OR "api_key") -example -sample -fixture"#,
+            "Notebooks",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Notebook outputs containing access tokens",
+            r#"(site:github.com OR site:gitlab.com) filetype:ipynb ("execution_count" OR "outputs") ("access_token" OR "Authorization: Bearer" OR "secret") -example -sample"#,
+            "Notebooks",
+            "High",
+        ),
+        DorkPattern::web(
+            "Docker Compose files with secret environment variables",
+            r#"(site:github.com OR site:gitlab.com) (filename:docker-compose.yml OR filename:docker-compose.yaml) ("environment:" OR "env_file:") ("API_KEY" OR "PASSWORD" OR "TOKEN") -example -sample -fixture"#,
+            "Docker/Terraform",
+            "High",
+        ),
+        DorkPattern::web(
+            "Dockerfiles with registry credentials",
+            r#"(site:github.com OR site:gitlab.com) (filename:Dockerfile OR inurl:dockerfile) ("docker login" OR "DOCKER_AUTH_CONFIG" OR "REGISTRY_PASSWORD") -example -sample -lock"#,
+            "Docker/Terraform",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Terraform variable files with secrets",
+            r#"(site:github.com OR site:gitlab.com OR site:sourcegraph.com) (filename:.tfvars OR filetype:tfvars) ("access_key" OR "secret_key" OR "client_secret") -example -sample -fixture -lock"#,
+            "Docker/Terraform",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Terraform state files with credentials",
+            r#"(site:github.com OR site:gitlab.com) (filename:terraform.tfstate OR filename:*.tfstate) ("access_key" OR "private_key" OR "password") -example -sample -fixture -lock"#,
+            "Docker/Terraform",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "PyPI packages with embedded credentials",
+            r#"site:pypi.org ("password=" OR "api_key=" OR "AWS_SECRET_ACCESS_KEY") ("setup.py" OR "pyproject.toml") -example -sample -fixture"#,
+            "Package Registries",
+            "High",
+        ),
+        DorkPattern::web(
+            "RubyGems packages with publish tokens",
+            r#"site:rubygems.org ("GEM_HOST_API_KEY" OR "gem push" OR "rubygems_api_key") ("TOKEN" OR "API_KEY") -example -sample"#,
+            "Package Registries",
+            "High",
+        ),
+        DorkPattern::web(
+            "Crates.io packages with registry tokens",
+            r#"site:crates.io ("CARGO_REGISTRY_TOKEN" OR "CARGO_TOKEN" OR "registry+https://") ("api_key" OR "token") -example -sample -lock"#,
+            "Package Registries",
+            "High",
+        ),
+        DorkPattern::web(
+            "Public package metadata with npm credentials",
+            r#"(site:npmjs.com OR site:registry.npmjs.org) ("_authToken" OR "NPM_TOKEN" OR "npm config set") -example -sample -package-lock.json"#,
+            "Package Registries",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Development subdomains exposing secrets",
+            r#"(site:dev.* OR site:staging.* OR site:test.*) ("API_KEY" OR "SECRET_KEY" OR "ACCESS_TOKEN") -example -sample -fixture"#,
+            "Subdomains",
+            "High",
+        ),
+        DorkPattern::web(
+            "Cloud-hosted subdomains with credentials",
+            r#"(site:*.herokuapp.com OR site:*.vercel.app OR site:*.netlify.app OR site:*.pages.dev) ("DATABASE_URL" OR "PRIVATE_KEY" OR "TOKEN") -example -sample"#,
+            "Subdomains",
+            "High",
+        ),
+        DorkPattern::web(
+            "API subdomains exposing configuration",
+            r#"(site:api.* OR site:internal.* OR site:admin.*) ("Authorization: Bearer" OR "X-API-Key" OR "client_secret") -example -sample -fixture"#,
+            "Subdomains",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Production environment configuration files",
+            r#"(site:github.com OR site:gitlab.com OR site:sourcegraph.com) (filename:.env.production OR filename:.env.prod OR filename:application.yml) ("SECRET" OR "PASSWORD" OR "TOKEN") -example -sample -fixture -lock"#,
+            "Config Files",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Application and service configuration secrets",
+            r#"(site:github.com OR site:gitlab.com) (filename:config.json OR filename:settings.py OR filename:application.properties OR filename:secrets.yml) ("api_key" OR "client_secret" OR "private_key") -example -sample -fixtures -lock"#,
+            "Config Files",
+            "High",
+        ),
+        DorkPattern::web(
+            "Credential helper configuration files",
+            r#"(site:github.com OR site:gitlab.com) (filename:.npmrc OR filename:.pypirc OR filename:.netrc OR filename:credentials) ("_authToken" OR "password" OR "token") -example -sample -fixture -lock"#,
+            "Config Files",
+            "Critical",
+        ),
+        DorkPattern::web(
+            "Serverless and deployment configuration secrets",
+            r#"(site:github.com OR site:gitlab.com) (filename:serverless.yml OR filename:serverless.yaml OR filename:firebase.json) ("environment" OR "secrets" OR "API_KEY") -example -sample -fixture"#,
+            "Config Files",
+            "High",
+        ),
+    ]);
+    dorks
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -1574,6 +1797,92 @@ mod tests {
                 d.query.contains("raw.githubusercontent.com"),
                 "Raw GitHub dork doesn't reference raw.githubusercontent.com: {}",
                 d.query
+            );
+        }
+    }
+
+    #[test]
+    fn web_dorks_cover_external_surfaces() {
+        let queries = get_web_dorks();
+        let combined = queries
+            .iter()
+            .map(|dork| dork.query.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        for site in [
+            "gist.github.com",
+            "gitlab.com",
+            "sourcegraph.com",
+            "bitbucket.org",
+            "pastebin.com",
+            "npmjs.com",
+            "hub.docker.com",
+        ] {
+            assert!(combined.contains(site), "web dork missing {}", site);
+        }
+    }
+
+    #[test]
+    fn web_dorks_have_expected_count_and_unique_identity() {
+        let dorks = get_web_dorks();
+        assert!(
+            dorks.len() >= 30,
+            "web dork catalogue unexpectedly small: {}",
+            dorks.len()
+        );
+
+        let queries: HashSet<&str> = dorks.iter().map(|dork| dork.query.as_str()).collect();
+        assert_eq!(queries.len(), dorks.len(), "duplicate web dork query found");
+
+        let names: HashSet<&str> = dorks.iter().map(|dork| dork.name.as_str()).collect();
+        assert_eq!(names.len(), dorks.len(), "duplicate web dork name found");
+    }
+
+    #[test]
+    fn web_dorks_cover_expected_categories_and_keywords() {
+        let dorks = get_web_dorks();
+        let categories: HashSet<&str> = dorks.iter().map(|dork| dork.category.as_str()).collect();
+        for category in [
+            "GitHub",
+            "GitLab",
+            "Sourcegraph",
+            "CI Logs",
+            "Notebooks",
+            "Docker/Terraform",
+            "Package Registries",
+            "Subdomains",
+            "Config Files",
+        ] {
+            assert!(
+                categories.contains(category),
+                "web dork category missing: {category}"
+            );
+        }
+
+        let combined = dorks
+            .iter()
+            .map(|dork| dork.query.as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        for keyword in [
+            "site:github.com",
+            "site:gitlab.com",
+            "site:sourcegraph.com",
+            "CI_JOB_TOKEN",
+            "filetype:ipynb",
+            "docker-compose",
+            "tfvars",
+            "npmjs.com",
+            "site:dev.*",
+            "filename:.env.production",
+            "-example",
+            "-sample",
+            "-fixture",
+            "-lock",
+        ] {
+            assert!(
+                combined.contains(keyword),
+                "web dork keyword missing: {keyword}"
             );
         }
     }
